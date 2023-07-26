@@ -20,7 +20,7 @@ export default class Index extends React.Component {
                 func: () => {
                     Taro.openAppAuthorizeSetting({
                         success (res) {
-                            console.log('success-----', res);
+                            console.log('Taro.openAppAuthorizeSetting success-----', res);
                         },
                         fail (res) {
                             console.log('fail-----', res);
@@ -33,7 +33,18 @@ export default class Index extends React.Component {
             }, 
             {
                 id: 'getWindowInfo',
-                func: null,
+                func: ()=>{
+                    // @ts-ignore
+                    Taro.getWindowInfo({
+                        success:(res)=>{
+                            console.log('Taro.getWindowInfo success ', res)
+                        },
+                        fail:(err=>{
+                            console.log('Taro getWindowInfo fail ', err)
+                        })
+                        
+                    });
+                },
             }, 
             {
                 id: 'getSystemSetting',
@@ -42,51 +53,80 @@ export default class Index extends React.Component {
                     Taro.showToast({
                         title: 'success'
                     })
-                    console.log('success', systemSetting);
+                    console.log('Taro.getSystemSetting success', systemSetting);
                 },
             }, 
             {
                 id: 'getSystemInfoSync',
-                func: () => {
-                    try {
-                        const res = Taro.getSystemInfoSync()
-                        console.log('getSystemInfoSync success ', res)
-                      } catch (e) {
-                        console.log('getSystemInfoSync exception')
-                      }
+                func: ()=>{
+                    const info = Taro.getSystemInfoSync()
+                    console.log('Taro.getSystemInfoAsync success', info);
                 },
-            }, 
+            },
             {
                 id: 'getSystemInfoAsync',
-                func: null,
+                func: ()=>{
+                    Taro.getSystemInfoAsync({
+                        success (res) {
+                            console.log('Taro.getSystemInfoAsync success', res); 
+                        },
+                        fail (err) {
+                            console.log('Taro.getSystemInfoAsync fail', err); 
+                        },
+                        complete (res) {
+                            console.log('Taro.getSystemInfoAsync success', res); 
+                        },
+                    })
+                    
+                },
             }, 
             {
                 id: 'getSystemInfo',
                 func: () => {
                     Taro.getSystemInfo({
                         success: function (res) {
-                          console.log('getSystemInfo success ', res)
-                        },
-                        fail: function (res) {
-                            console.log('getSystemInfo fail ', res)
-                        },
-                        complete: function (res) {
-                            console.log('getSystemInfo complete ', res)
-                        },
+                            console.log('Taro.getSystemInfo success', res);
+                          },
+                          fail: function (err) {
+                            console.log('Taro.getSystemInfo fail', err);
+                          }
                     })
                 },
             }, 
             {
                 id: 'getDeviceInfo',
-                func: null,
+                func: ()=>{
+                    const deviceInfo = Taro.getDeviceInfo()
+                    console.log('Taro.getDeviceInfo success ',deviceInfo)
+                },
             }, 
             {
                 id: 'getAppBaseInfo',
-                func: null,
+                func: ()=>{
+                    // @ts-ignore
+                    Taro.getAppBaseInfo({
+                        success: function (res) {
+                        console.log('Taro.getAppBaseInfo success ', res)
+                        },
+                        fail: function (err) {
+                            console.log('Taro.getAppBaseInfo fail ', err)
+                        }
+                    })
+                },
             }, 
             {
                 id: 'getAppAuthorizeSetting',
-                func: null,
+                func: ()=>{
+                   // @ts-ignore
+                    let info = Taro.getAppAuthorizeSetting({
+                        success: function (res) {
+                            console.log('Taro.getAppAuthorizeSetting success ', res)
+                          },
+                          fail: function (err) {
+                              console.log('Taro.getAppAuthorizeSetting fail ', err)
+                          }
+                    })
+                },
             }, 
         ], 
     }
