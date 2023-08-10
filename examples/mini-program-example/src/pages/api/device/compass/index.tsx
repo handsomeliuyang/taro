@@ -14,7 +14,7 @@ export default class Index extends React.Component {
   state = {
     list: [
       {
-        id: 'stopCompass',
+        id: 'stopCompass-callback',
         func: () => {
           TestConsole.consoleTest('Taro.stopCompass')
           Taro.stopCompass({
@@ -26,26 +26,45 @@ export default class Index extends React.Component {
             }, complete (res) {
               TestConsole.consoleComplete(res)
             },
-          }).then(res => {
-            TestConsole.consoleReturn(res)
           })
         },
       },
       {
-        id: 'startCompass',
+        id: 'stopCompass-promise',
         func: () => {
-          TestConsole.consoleTest('Taro.startCompass')
+          TestConsole.consoleTest('Taro.stopCompass-promise')
+          Taro.stopCompass().then(res => {
+            TestConsole.consoleReturn(res)
+          }).catch(err => {
+            TestConsole.consoleFail(err)
+          })
+        },
+      },
+      {
+        id: 'startCompass-callback',
+        func: () => {
+          TestConsole.consoleTest('Taro.startCompass-callback')
           Taro.startCompass({
             success (res) {
               TestConsole.consoleSuccess(res)
             },
             fail (res) {
               TestConsole.consoleFail(res)
-            }, complete (res) {
+            },
+            complete (res) {
               TestConsole.consoleComplete(res)
             },
-          }).then(res => {
+          })
+        },
+      },
+      {
+        id: 'startCompass-promise',
+        func: () => {
+          TestConsole.consoleTest('Taro.startCompass-promise')
+          Taro.startCompass().then(res => {
             TestConsole.consoleReturn(res)
+          }).catch(err => {
+            TestConsole.consoleFail(err)
           })
         },
       },

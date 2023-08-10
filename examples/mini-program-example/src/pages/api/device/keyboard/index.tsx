@@ -28,9 +28,16 @@ export default class Index extends React.Component {
         },
       },
       {
-        id: 'hideKeyboard',
+        id: 'offKeyboardHeightChange-nocallback',
         func: () => {
-          TestConsole.consoleTest('Taro.hideKeyboard ')
+          TestConsole.consoleTest('Taro.offKeyboardHeightChange-nocallback')
+          Taro.offKeyboardHeightChange()
+        },
+      },
+      {
+        id: 'hideKeyboard-callback',
+        func: () => {
+          TestConsole.consoleTest('Taro.hideKeyboard-callback')
           Taro.hideKeyboard({
             success: (res) => {
               TestConsole.consoleSuccess(res)
@@ -41,15 +48,24 @@ export default class Index extends React.Component {
             complete: (res) => {
               TestConsole.consoleComplete(res)
             },
-          }).then(res => {
-            TestConsole.consoleReturn(res)
           })
         },
       },
       {
-        id: 'getSelectedTextRange',
+        id: 'hideKeyboard-promisse',
         func: () => {
-          TestConsole.consoleTest('Taro.getSelectedTextRange ')
+          TestConsole.consoleTest('Taro.hideKeyboard-promisse')
+          Taro.hideKeyboard().then(res => {
+            TestConsole.consoleReturn(res)
+          }).catch(err => {
+            TestConsole.consoleFail(err)
+          })
+        },
+      },
+      {
+        id: 'getSelectedTextRange-callback',
+        func: () => {
+          TestConsole.consoleTest('Taro.getSelectedTextRange-callback ')
           Taro.getSelectedTextRange({
             success: (res) => {
               TestConsole.consoleSuccess(res)
@@ -60,8 +76,17 @@ export default class Index extends React.Component {
             complete: (res) => {
               TestConsole.consoleComplete(res)
             },
-          }).then(res => {
+          })
+        },
+      },
+      {
+        id: 'getSelectedTextRange-promise',
+        func: () => {
+          TestConsole.consoleTest('Taro.getSelectedTextRange-promise ')
+          Taro.getSelectedTextRange().then(res => {
             TestConsole.consoleReturn(res)
+          }).catch(err => {
+            TestConsole.consoleFail(err)
           })
         },
       },

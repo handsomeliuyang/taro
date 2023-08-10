@@ -18,7 +18,7 @@ export default class Index extends React.Component {
         func: null,
       },
       {
-        id: 'setScreenBrightness',
+        id: 'setScreenBrightness-callback',
         func: () => {
           TestConsole.consoleTest('Taro.setScreenBrightness')
           TestConsole.consoleNormal('Taro.setScreenBrightness value:', this.state.brightValue)
@@ -33,7 +33,18 @@ export default class Index extends React.Component {
             complete: (res) => {
               TestConsole.consoleComplete(res)
             },
-          }).then(res => {
+          })
+        },
+      },
+      {
+        id: 'setScreenBrightness-promise',
+        func: () => {
+          TestConsole.consoleTest('Taro.setScreenBrightness')
+          TestConsole.consoleNormal('Taro.setScreenBrightness value:', this.state.brightValue)
+          Taro.setScreenBrightness({
+            value: this.state.brightValue
+          }
+          ).then(res => {
             TestConsole.consoleReturn(res)
           })
         },
@@ -95,7 +106,7 @@ export default class Index extends React.Component {
         },
       },
       {
-        id: 'getScreenBrightness',
+        id: 'getScreenBrightness-callback',
         func: () => {
           TestConsole.consoleTest('Taro.getScreenBrightness')
           Taro.getScreenBrightness({
@@ -108,8 +119,17 @@ export default class Index extends React.Component {
             complete: (res) => {
               TestConsole.consoleComplete(res)
             },
-          }).then(res => {
+          })
+        },
+      },
+      {
+        id: 'getScreenBrightness-promise',
+        func: () => {
+          TestConsole.consoleTest('Taro.getScreenBrightness-promise')
+          Taro.getScreenBrightness().then(res => {
             TestConsole.consoleReturn(res)
+          }).catch(err => {
+            TestConsole.consoleFail(err)
           })
         },
       },

@@ -174,11 +174,36 @@ export default class Index extends React.Component {
       },
       {
         id: 'enableAlertBeforeUnload',
-        func: null,
+        func: ()=>{
+          Taro.enableAlertBeforeUnload({
+            message:'确定要退出吗？',
+            complete (res) {
+              console.log(res)
+            },
+            fail (res) {
+              console.error(res)
+            },
+            success (res) {
+              console.log(res)
+            },
+          })
+        },
       },
       {
         id: 'disableAlertBeforeUnload',
-        func: null,
+        func:  ()=>{
+          Taro.disableAlertBeforeUnload({
+            complete (res) {
+              console.log(res)
+            },
+            fail (res) {
+              console.error(res)
+            },
+            success (res) {
+              console.log(res)
+            },
+          })
+        },
       },
     ],
   }

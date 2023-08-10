@@ -1,6 +1,7 @@
 import React from 'react'
 import Taro, { useReady } from '@tarojs/taro'
-import { View, Canvas  } from '@tarojs/components'
+import { View, Canvas } from '@tarojs/components'
+import { TestConsole } from '@/util/util'
 import ButtonList from '@/components/buttonList'
 import './index.scss'
 
@@ -11,77 +12,81 @@ import './index.scss'
 
 export default class Index extends React.Component {
   state = {
+    node: 'canvas',
     list: [
       {
         id: 'createCanvasContext',
         func: () => {
-            const context = Taro.createCanvasContext('canvas')
-            context.setStrokeStyle('#00ff00')
-            context.setLineWidth(5)
-            context.rect(0, 0, 200, 200)
-            context.stroke()
-            context.setStrokeStyle('#ff0000')
-            context.setLineWidth(2)
-            context.moveTo(160, 100)
-            context.arc(100, 100, 60, 0, 2 * Math.PI, true)
-            context.moveTo(140, 100)
-            context.arc(100, 100, 40, 0, Math.PI, false)
-            context.moveTo(85, 80)
-            context.arc(80, 80, 5, 0, 2 * Math.PI, true)
-            context.moveTo(125, 80)
-            context.arc(120, 80, 5, 0, 2 * Math.PI, true)
-            context.stroke()
-            context.draw()
-            console.log('Taro.createCanvasContext success ', context)
+          TestConsole.consoleTest('Taro.createCanvasContext')
+          const context = Taro.createCanvasContext(this.state.node)
+          context.setStrokeStyle('#00ff00')
+          context.setLineWidth(5)
+          context.rect(0, 0, 200, 200)
+          context.stroke()
+          context.setStrokeStyle('#ff0000')
+          context.setLineWidth(2)
+          context.moveTo(160, 100)
+          context.arc(100, 100, 60, 0, 2 * Math.PI, true)
+          context.moveTo(140, 100)
+          context.arc(100, 100, 40, 0, Math.PI, false)
+          context.moveTo(85, 80)
+          context.arc(80, 80, 5, 0, 2 * Math.PI, true)
+          context.moveTo(125, 80)
+          context.arc(120, 80, 5, 0, 2 * Math.PI, true)
+          context.stroke()
+          context.draw()
+          TestConsole.consoleSuccess(context)
         },
       },
       {
         id: 'canvasToTempFilePath',
         func: () => {
-            const context = Taro.createCanvasContext('canvas')
-            context.setStrokeStyle('#00ff00')
-            context.setLineWidth(5)
-            context.rect(0, 0, 200, 200)
-            context.stroke()
-            context.setStrokeStyle('#ff0000')
-            context.setLineWidth(2)
-            context.moveTo(160, 100)
-            context.arc(100, 100, 60, 0, 2 * Math.PI, true)
-            context.moveTo(140, 100)
-            context.arc(100, 100, 40, 0, Math.PI, false)
-            context.moveTo(85, 80)
-            context.arc(80, 80, 5, 0, 2 * Math.PI, true)
-            context.moveTo(125, 80)
-            context.arc(120, 80, 5, 0, 2 * Math.PI, true)
-            context.stroke()
-            context.draw(true, () => {
-              Taro.canvasToTempFilePath({
-                x: 100,
-                y: 200,
-                width: 50,
-                height: 50,
-                destWidth: 100,
-                destHeight: 100,
-                quality: 1,
-                fileType: 'png',
-                canvasId: 'canvas',
-                success: function (res) {
-                  console.log('Taro.canvasToTempFilePath success', res)
-                },
-                fail: function (res) {
-                  console.log('Taro.canvasToTempFilePath fail', res)
-                },
-                complete: function (res) {
-                  console.log('Taro.canvasToTempFilePath complete', res)
-                },
-              })
+          TestConsole.consoleTest('Taro.canvasToTempFilePath')
+          const context = Taro.createCanvasContext(this.state.node)
+          context.setStrokeStyle('#00ff00')
+          context.setLineWidth(5)
+          context.rect(0, 0, 200, 200)
+          context.stroke()
+          context.setStrokeStyle('#ff0000')
+          context.setLineWidth(2)
+          context.moveTo(160, 100)
+          context.arc(100, 100, 60, 0, 2 * Math.PI, true)
+          context.moveTo(140, 100)
+          context.arc(100, 100, 40, 0, Math.PI, false)
+          context.moveTo(85, 80)
+          context.arc(80, 80, 5, 0, 2 * Math.PI, true)
+          context.moveTo(125, 80)
+          context.arc(120, 80, 5, 0, 2 * Math.PI, true)
+          context.stroke()
+          context.draw(true, () => {
+            Taro.canvasToTempFilePath({
+              x: 100,
+              y: 200,
+              width: 50,
+              height: 50,
+              destWidth: 100,
+              destHeight: 100,
+              quality: 1,
+              fileType: 'png',
+              canvasId: 'canvas',
+              success: function (res) {
+                TestConsole.consoleSuccess(res)
+              },
+              fail: function (res) {
+                TestConsole.consoleFail(res)
+              },
+              complete: function (res) {
+                TestConsole.consoleComplete(res)
+              },
             })
+          })
         },
       },
       {
         id: 'CanvasContext',
         func: () => {
-          const ctx = Taro.createCanvasContext('canvas')
+          TestConsole.consoleTest('Taro.CanvasContext')
+          const ctx = Taro.createCanvasContext(this.state.node)
           // Draw coordinates
           ctx.arc(100, 75, 50, 0, 2 * Math.PI)
           ctx.setFillStyle('#EEEEEE')
@@ -118,6 +123,7 @@ export default class Index extends React.Component {
           ctx.setStrokeStyle('#333333')
           ctx.stroke()
           ctx.draw()
+          TestConsole.consoleSuccess(ctx)
         },
       },
       {
@@ -125,12 +131,100 @@ export default class Index extends React.Component {
         func: null,
       },
       {
-        id: 'canvasPutImageData',
-        func: null,
+        id: 'canvasPutImageData-calback',
+        func: () => {
+          TestConsole.consoleTest('Taro.canvasPutImageData-calback')
+          const data = new Uint8ClampedArray([255, 0, 0, 1])
+          Taro.canvasPutImageData({
+            canvasId: this.state.node,
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 1,
+            data: data,
+            success (res) {
+              TestConsole.consoleSuccess(res)
+            },
+            fail (res) {
+              console.error(res)
+              TestConsole.consoleFail(res)
+            },
+            complete (res) {
+              TestConsole.consoleComplete(res)
+            },
+          })
+        },
       },
       {
-        id: 'canvasGetImageData',
-        func: null,
+        id: 'canvasPutImageData-promise',
+        func: () => {
+          TestConsole.consoleTest('Taro.canvasPutImageData-promise')
+          let that = this
+          Taro.canvasGetImageData({
+            canvasId: that.state.node,
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100,
+            success (res) {
+              const data =  res.data
+              Taro.canvasPutImageData({
+                canvasId: that.state.node,
+                x: 0,
+                y: 0,
+                width: 1,
+                height: 1,
+                data: data
+              }).then(res => {
+                TestConsole.consoleSuccess(res)
+              }).catch(res => {
+                TestConsole.consoleFail(res)
+              })
+            },
+          })
+
+          
+        },
+      },
+      {
+        id: 'canvasGetImageData-callback',
+        func: () => {
+          TestConsole.consoleTest('Taro.canvasGetImageData-callback')
+          Taro.canvasGetImageData({
+            canvasId: this.state.node,
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100,
+            success (res) {
+              TestConsole.consoleSuccess(res)
+            },
+            fail (res) {
+              TestConsole.consoleFail(res)
+            },
+            complete (res) {
+              TestConsole.consoleComplete(res)
+            },
+          })
+        },
+      },
+      {
+        id: 'canvasGetImageData-promise',
+        func: () => {
+          TestConsole.consoleTest('Taro.canvasGetImageData-promise')
+          Taro.canvasGetImageData({
+            canvasId: this.state.node,
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 1
+          }).then(res => {
+            console.log(res.data)
+            TestConsole.consoleSuccess(res)
+          }).catch(res => {
+            TestConsole.consoleFail(res)
+          })
+        },
       },
       {
         id: 'Canvas',
@@ -166,11 +260,11 @@ export default class Index extends React.Component {
       },
     ],
   }
-  render() {
+  render () {
     const { list } = this.state
     return (
       <View className='api-page'>
-        <Canvas canvasId="canvas" className="canvas"></Canvas>
+        <Canvas canvasId='canvas' className='canvas'></Canvas>
         <ButtonList buttonList={list} />
       </View>
     )
