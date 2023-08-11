@@ -22,39 +22,41 @@ export const openAppAuthorizeSetting: typeof Taro.openAppAuthorizeSetting = (opt
   } = options as Exclude<typeof options, undefined>
 
   const handle = new MethodHandler({ name, success, fail, complete })
-
-  // @ts-ignore
-  const ret = native.openAppAuthorizeSetting({
-    success: (res: any) => {
-      return handle.success(res)
-    },
-    fail: (err: any) => {
-      return handle.fail(err)
-    }
+  return new Promise<TaroGeneral.CallbackResult>((resolve, reject) => {
+    // @ts-ignore
+    native.openAppAuthorizeSetting({
+      success: (res: any) => {
+        return handle.success(res, { resolve, reject })
+      },
+      fail: (err: any) => {
+        return handle.fail(err, { resolve, reject })
+      }
+    })
   })
-  return ret
 }
 
 /** 获取窗口信息 */
-// @ts-ignore
-export const getWindowInfo: typeof Taro.getWindowInfo = async () => {
+export const getWindowInfo: typeof Taro.getWindowInfo = () => {
 
   // @ts-ignore
-  const info = await native.getWindowInfo()
-  info.safeArea = info.safeArea || {
-    bottom: 0,
-    /** 安全区域的高度，单位逻辑像素 */
-    height: 0,
-    /** 安全区域左上角横坐标 */
-    left: 0,
-    /** 安全区域右下角横坐标 */
-    right: 0,
-    /** 安全区域左上角纵坐标 */
-    top: 0,
-    /** 安全区域的宽度，单位逻辑像素 */
-    width: 0
+  const info = native.getWindowInfo()
+  const res: Taro.getWindowInfo.Result = {
+    pixelRatio: info.pixelRatio,
+    screenWidth: info.pixelRatio,
+    screenHeight: info.screenHeight,
+    windowWidth: info.windowWidth,
+    windowHeight: info.windowHeight,
+    statusBarHeight: info.statusBarHeight,
+    safeArea: info.safeArea || {
+      bottom: 0,
+      height: 0,
+      left: 0,
+      right: 0,
+      top: 0,
+      width: 0
+    }
   }
-  return info
+  return res
 }
 
 /** 获取设备设置 */
@@ -77,22 +79,20 @@ export const getDeviceInfo: typeof Taro.getDeviceInfo = () => {
 }
 
 /** 获取微信APP基础信息 */
-// @ts-ignore
-export const getAppBaseInfo: typeof Taro.getAppBaseInfo = async () => {
+export const getAppBaseInfo: typeof Taro.getAppBaseInfo = () => {
   // @ts-ignore
-  const info = await native.getAppBaseInfo()
-  info.version = info.appVersion
-  info.language = info.appLanguage
-  delete info.appVersion
-  delete info.appLanguage
-  return info
+  const info = JSON.parse(JSON.stringify(native.getAppBaseInfo()))
+  return {
+    ...info,
+    version: info.appVersion,
+    language: info.appLanguage
+  }
 }
 
 /** 获取微信APP授权设置 */
-// @ts-ignore
-export const getAppAuthorizeSetting: typeof Taro.getAppAuthorizeSetting = async () => {
+export const getAppAuthorizeSetting: typeof Taro.getAppAuthorizeSetting = () => {
   // @ts-ignore
-  const info = await native.getAppAuthorizeSetting()
+  const info = JSON.parse(JSON.stringify(native.getAppAuthorizeSetting()))
   return {
     ...info,
     locationReducedAccuracy: info.locationAccuracy
@@ -103,8 +103,19 @@ export const getAppAuthorizeSetting: typeof Taro.getAppAuthorizeSetting = async 
 export const getSystemInfoSync: typeof Taro.getSystemInfoSync = () => {
   // @ts-ignore
   const info = JSON.parse(JSON.stringify(native.getSystemInfoSync()))
-  
-  return info
+  const windowInfo = getWindowInfo()
+  const systemSetting = getSystemSetting()
+  const deviceInfo = getDeviceInfo()
+  const appBaseInfo = getAppBaseInfo()
+  const appAuthorizeSetting = getAppAuthorizeSetting()
+  return {
+    ...info,
+    ...windowInfo,
+    ...systemSetting,
+    ...deviceInfo,
+    ...appBaseInfo,
+    ...appAuthorizeSetting
+  }
 }
 
 /** 获取系统信息 */

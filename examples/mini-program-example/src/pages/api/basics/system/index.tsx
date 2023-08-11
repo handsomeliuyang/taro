@@ -11,7 +11,7 @@ import './index.scss'
 
 export default class Index extends React.Component {
   state = {
-    list:[
+    list: [
       {
         id: 'openSystemBluetoothSetting',
         func: null,
@@ -21,24 +21,26 @@ export default class Index extends React.Component {
         func: () => {
           TestConsole.consoleTest('Taro.openAppAuthorizeSetting')
           Taro.openAppAuthorizeSetting({
-            success(res) {
-              TestConsole.consoleSuccess('Taro.openAppAuthorizeSetting '+JSON.stringify(res))
+            success (res) {
+              TestConsole.consoleSuccess(res)
             },
-            fail(res) {
-              TestConsole.consoleFail('Taro.openAppAuthorizeSetting '+JSON.stringify(res))
+            fail (res) {
+              TestConsole.consoleFail(res)
             },
-            complete(res) {
-              TestConsole.consoleComplete('Taro.openAppAuthorizeSetting '+JSON.stringify(res))
+            complete (res) {
+              TestConsole.consoleComplete(res)
             },
+          }).then(res => {
+            TestConsole.consoleReturn(res)
           })
         },
       },
       {
         id: 'getWindowInfo',
-        func: async () => {
+        func: () => {
           TestConsole.consoleTest('Taro.getWindowInfo')
-          const res = await Taro.getWindowInfo()
-          TestConsole.consoleSuccess('Taro.getWindowInfo '+JSON.stringify(res))
+          const res = Taro.getWindowInfo()
+          TestConsole.consoleSuccess(res)
         },
       },
       {
@@ -46,7 +48,7 @@ export default class Index extends React.Component {
         func: () => {
           TestConsole.consoleTest('Taro.getSystemSetting')
           const res = Taro.getSystemSetting()
-          TestConsole.consoleSuccess('Taro.getSystemSetting '+JSON.stringify(res))
+          TestConsole.consoleSuccess(res)
         },
       },
       {
@@ -55,43 +57,65 @@ export default class Index extends React.Component {
           TestConsole.consoleTest('Taro.getSystemInfoSync')
           try {
             const res = Taro.getSystemInfoSync()
-            TestConsole.consoleSuccess('Taro.getSystemInfoSync '+JSON.stringify(res))
+            TestConsole.consoleSuccess(res)
           } catch (e) {
-            TestConsole.consoleFail('Taro.getSystemInfoSync '+JSON.stringify(e))
+            TestConsole.consoleFail(e)
           }
         },
       },
       {
-        id: 'getSystemInfoAsync',
+        id: 'getSystemInfoAsync-callback',
         func: () => {
           TestConsole.consoleTest('Taro.getSystemInfoAsync')
           Taro.getSystemInfoAsync({
             success: function (res) {
-              TestConsole.consoleSuccess('Taro.getSystemInfoAsync '+JSON.stringify(res))
+              TestConsole.consoleSuccess(res)
             },
             fail: function (res) {
-              TestConsole.consoleFail('Taro.getSystemInfoAsync '+JSON.stringify(res))
+              TestConsole.consoleFail(res)
             },
             complete: function (res) {
-              TestConsole.consoleComplete('Taro.getSystemInfoAsync '+JSON.stringify(res))
+              TestConsole.consoleComplete(res)
             },
           })
         },
       },
       {
-        id: 'getSystemInfo',
+        id: 'getSystemInfoAsync-promise',
+        func: () => {
+          TestConsole.consoleTest('Taro.getSystemInfoAsync-promise')
+          Taro.getSystemInfoAsync().then(res => {
+            TestConsole.consoleReturn(res)
+          }).catch(err => {
+            TestConsole.consoleFail(err)
+          })
+        },
+      },
+      {
+        id: 'getSystemInfo-callback',
         func: () => {
           TestConsole.consoleTest('Taro.getSystemInfo')
           Taro.getSystemInfo({
             success: function (res) {
-              TestConsole.consoleSuccess('Taro.getSystemInfo '+JSON.stringify(res))
+              TestConsole.consoleSuccess(res)
             },
             fail: function (res) {
-              TestConsole.consoleFail('Taro.getSystemInfo '+JSON.stringify(res))
+              TestConsole.consoleFail(res)
             },
             complete: function (res) {
-              TestConsole.consoleComplete('Taro.getSystemInfo '+JSON.stringify(res))
+              TestConsole.consoleComplete(res)
             },
+          })
+        },
+      },
+      {
+        id: 'getSystemInfo-promise',
+        func: () => {
+          TestConsole.consoleTest('Taro.getSystemInfo-promise')
+          Taro.getSystemInfo().then(res => {
+            TestConsole.consoleReturn(res)
+          }).catch(err => {
+            TestConsole.consoleFail(err)
           })
         },
       },
@@ -100,28 +124,28 @@ export default class Index extends React.Component {
         func: () => {
           TestConsole.consoleTest('Taro.getDeviceInfo')
           let res = Taro.getDeviceInfo()
-          TestConsole.consoleSuccess('Taro.getDeviceInfo '+JSON.stringify(res))
+          TestConsole.consoleSuccess(res)
         },
       },
       {
         id: 'getAppBaseInfo',
-        func: async () => {
+        func: () => {
           TestConsole.consoleTest('Taro.getAppBaseInfo')
-          let res = await Taro.getAppBaseInfo()
-          TestConsole.consoleSuccess('Taro.getAppBaseInfo '+JSON.stringify(res))
+          let res = Taro.getAppBaseInfo()
+          TestConsole.consoleSuccess(res)
         },
       },
       {
         id: 'getAppAuthorizeSetting',
-        func: async () => {
+        func: () => {
           TestConsole.consoleTest('Taro.getAppAuthorizeSetting')
-          let res = await Taro.getAppAuthorizeSetting()
-          TestConsole.consoleSuccess('Taro.getAppAuthorizeSetting '+JSON.stringify(res))
+          let res = Taro.getAppAuthorizeSetting()
+          TestConsole.consoleSuccess(res)
         },
       },
     ],
   }
-  render() {
+  render () {
     const { list } = this.state
     return (
       <View className='api-page'>
