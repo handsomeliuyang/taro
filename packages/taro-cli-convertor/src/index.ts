@@ -267,32 +267,16 @@ export default class Convertor {
               analyzeImportUrl(self.root, sourceFilePath, scriptFiles, source, value, self.isTsProject)
             },
 
-            //Fix const xxx = require('filepath') --> import xxx from 'filepath'
-            VariableDeclarator(astPath) {
-              const node = astPath.node
-              const id = node.id as t.Identifier; // Identifier: xxx
-              const init = node.init; // CallExpression: callee & arguments
-              if (t.isCallExpression(init)) { //判断node类型
-                const callee = init.callee;
-                const args = init.arguments as Array<t.StringLiteral>
-                if (callee && callee.type === 'Identifier') {
-                  if (callee.name === 'require') {
-                    const value = args[0].value
-                    /* if (value) {
-                        analyzeImportUrl(self.root, sourceFilePath, scriptFiles, args[0], value);
-                    } */
-                    astPath.parentPath.insertBefore(t.importDeclaration( [ t.importDefaultSpecifier(t.identifier(id.name)) ], t.stringLiteral(value)))
-                    astPath.remove()
-                  }
-                }
-              }
-            },
-
             CallExpression (astPath) {
+              const node = astPath.node
               const calleePath = astPath.get('callee')
               const callee = calleePath.node
               if (callee.type === 'Identifier') {
-                if (WX_GLOBAL_FN.has(callee.name)) {
+                if (callee.name === 'require') {
+                  const args = node.arguments as Array<t.StringLiteral>
+                  const value = args[0].value
+                  analyzeImportUrl(self.root, sourceFilePath, scriptFiles, args[0], value)
+                } else if (WX_GLOBAL_FN.has(callee.name)) {
                   calleePath.replaceWith(t.memberExpression(t.identifier('Taro'), callee as t.Identifier))
                   needInsertImportTaro = true
                 }
@@ -380,10 +364,13 @@ export default class Convertor {
             if (depComponents && depComponents.size) {
               depComponents.forEach(componentObj => {
                 const name = pascalCase(componentObj.name)
-                const component = componentObj.path
+                let component = componentObj.path
+                if (component.indexOf(':') !== -1) {
+                  component = path.relative(sourceFilePath, component)
+                }
                 lastImport.insertAfter(
                   template(
-                    `import ${name} from '${promoteRelativePath(path.relative(sourceFilePath, component))}'`,
+                    `import ${name} from '${promoteRelativePath(component)}'`,
                     babylonConfig
                   )() as t.Statement
                 )
@@ -400,19 +387,19 @@ export default class Convertor {
     }
   }
 
-  //Fix: 在小程序三方件中找到入口 index
-  getModulePath(modulePath) {
-    let parts = modulePath.split('/');
+  // Fix: 在小程序三方件中找到入口 index
+  getModulePath (modulePath) {
+    const parts = modulePath.split('/')
     let moduleIndex = path.join(this.root, 'node_modules') // node_modules文件夹
     if (parts.at(-1) === 'index') {
-        parts.pop();
+      parts.pop()
     } 
-    parts.push('index.js');
+    parts.push('index.js')
     parts.forEach(part => {
-        const moduleFile = moduleIndex;
-        moduleIndex = searchFile(moduleFile, part);
+      const moduleFile = moduleIndex
+      moduleIndex = searchFile(moduleFile, part)
     })
-    return moduleIndex;
+    return moduleIndex
   }
 
   getApp () {
@@ -434,12 +421,9 @@ export default class Convertor {
         for (const key in using) {
           if (using[key].startsWith('plugin://')) continue
           const componentPath = using[key]
-          using[key] = path.join(this.root, componentPath)
-          // Fix: 插件依赖目录为 miniprogram_npm，现将其目录改为npm_module
-          if (!fs.existsSync(using[key] + this.fileTypes.SCRIPT)) {
-            const realPath = this.getModulePath(componentPath);
-            using[key] = realPath.slice(0,-3);
-          }
+          if (this.inNodeModule(componentPath) === -1) {
+            using[key] = path.join(this.root, componentPath)
+          } // Fix: 三方组件路径无修改加入，修改放到pages进行
         }
         this.entryUsingComponents = using
         delete this.entryJSON.usingComponents
@@ -502,6 +486,10 @@ export default class Convertor {
     }
     if (files.size) {
       files.forEach(file => {
+        if (this.inNodeModule(file) === 1) { // 处理require中的 三方件
+          this.generateNodeModule(file)
+          return
+        }
         if (!fs.existsSync(file) || this.hadBeenCopyedFiles.has(file)) {
           return
         }
@@ -672,6 +660,48 @@ ${code}
     return path.join(path.dirname(file), path.basename(file, path.extname(file)) + '.vue')
   }
 
+  // Fix: 判断是否是三方件
+  inNodeModule (moduleName: string) {
+    const nodeModules = path.resolve(this.root, 'node_modules')
+    if (!fs.existsSync(nodeModules)) { // node_modules不存在，告诉
+      return 0
+    }
+    const modules = fs.readdirSync(nodeModules)
+    const parts = moduleName.split('/')
+    if (modules.indexOf(parts[0]) === -1) {
+      return -1
+    } else {
+      return 1
+    }
+  }
+
+  // Fix: 递归转换（拷贝）三方件
+  traverseModule (moduleDir: string, nextDir: string) {
+    const filePath = path.join(moduleDir, nextDir)
+    if (!fs.lstatSync(filePath).isDirectory()) {  // 如果是文件，直接拷贝
+      const modulePath = filePath.replace(this.root, this.convertRoot)
+      this.copyFileToTaro(filePath, modulePath)
+    } else {
+      const moduleDirs = fs.readdirSync(filePath)
+      moduleDirs.forEach(dir => {
+        this.traverseModule (filePath, dir)
+      })
+    }
+  }
+
+  // Fix: 转换三方模块的接口，当前先实现拷贝对应的三方件到node_modules
+  generateNodeModule (moduleName: string) {
+    const parts = moduleName.split('/')
+    const convertModulePath = path.resolve(this.convertRoot, 'node_modules', parts[0])
+    if (!fs.existsSync(convertModulePath)) {
+      const modulePath = path.resolve(this.root, 'node_modules', parts[0])
+      const moduleDirs = fs.readdirSync(modulePath)
+      moduleDirs.forEach(dir => {
+        this.traverseModule(modulePath, dir)
+      })
+    }
+  }
+
   traversePages () {
     this.pages.forEach(page => {
       const pagePath = this.isTsProject ? path.join(this.miniprogramRoot, page) : path.join(this.root, page)
@@ -716,15 +746,16 @@ ${code}
                 let componentPath
                 if (unResolveComponentPath.startsWith(this.root)) {
                   componentPath = unResolveComponentPath
+                } else if (this.inNodeModule(unResolveComponentPath) === 1) { // 处理app.json导入的 + 自身导入的 三方件路径
+                  const realPath = this.getModulePath(unResolveComponentPath)
+                  // 转成相对路径
+                  let relativePath = realPath.replace(this.root + '\\node_modules\\', '')
+                  relativePath = relativePath.split(path.sep).join('/')
+                  componentPath = relativePath.slice(0,-3)
                 } else {
                   componentPath = path.resolve(pageConfigPath, '..', pageUsingComponents[component])
                   if (!fs.existsSync(resolveScriptPath(componentPath))) {
                     componentPath = path.join(this.root, pageUsingComponents[component])
-                    // Fix: 某些组件不是app.json导入，同样需要适配路径
-                    if (!fs.existsSync(componentPath + this.fileTypes.SCRIPT)) {
-                      const realPath = this.getModulePath(pageUsingComponents[component]);
-                      componentPath = realPath.slice(0,-3);
-                    }
                   }
                 }
 
@@ -807,7 +838,18 @@ ${code}
         const param: ITaroizeOptions = {}
         const depComponents = new Set<IComponent>()
         if (!fs.existsSync(componentJSPath)) {
-          throw new Error(`组件 ${component} 没有 JS 文件！`)
+          const inNodeModuleResult = this.inNodeModule(component)
+          if (inNodeModuleResult === -1) {
+            throw new Error(`组件 ${component} 没有 JS 文件！`)
+          }
+          if (inNodeModuleResult === 0) {
+            printLog(processTypeEnum.CONVERT, 'pnpm install before convert', componentObj.path)
+            return
+          }
+          if (inNodeModuleResult === 1) {
+            this.generateNodeModule(component)
+            return
+          }
         }
         printLog(processTypeEnum.CONVERT, '组件文件', this.generateShowPath(componentJSPath))
         if (fs.existsSync(componentConfigPath)) {
@@ -821,14 +863,9 @@ ${code}
               let componentPath = path.resolve(componentConfigPath, '..', componentUsingComponnets[component])
               if (!fs.existsSync(resolveScriptPath(componentPath))) {
                 componentPath = path.join(this.root, componentUsingComponnets[component])
-                //Fix
-                if (!fs.existsSync(componentPath + this.fileTypes.SCRIPT)) {
-                  const realPath = this.getModulePath(componentUsingComponnets[component]);
-                  componentPath = realPath.slice(0, -3);
-                }
               }
               if (!fs.existsSync(componentPath + this.fileTypes.SCRIPT)) {
-                componentPath = path.join(componentPath, `/index`);
+                componentPath = path.join(componentPath, `/index`)
               }
               depComponents.add({
                 name: component,

@@ -15,7 +15,6 @@ import traverse, { Binding, NodePath } from '@babel/traverse'
 import * as t from '@babel/types'
 // import * as template from '@babel/template'
 // const template = require('babel-template')
-import babel_plugin_transform_commonjs from "babel-plugin-transform-commonjs"
 import { prettyPrint } from 'html'
 import { cloneDeep, get as safeGet, isArray,snakeCase } from 'lodash'
 // import { transform as parse } from '@babel/core'
@@ -238,8 +237,7 @@ function parseCode (code: string) {
       objectRestSpread,
       [decorators, {legacy: true}],
       dynamicImport,
-      optionalChaining,
-      babel_plugin_transform_commonjs
+      optionalChaining
     ]
   }) as { ast: t.File }).ast
 }
