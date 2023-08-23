@@ -128,6 +128,7 @@ export default class Convertor {
   framework: 'react' | 'vue'
   isTsProject: boolean
   miniprogramRoot: string
+  external: string[]
 
   constructor (root, isTsProject) {
     this.root = root
@@ -155,6 +156,7 @@ export default class Convertor {
   init () {
     console.log(chalk.green('开始代码转换...'))
     this.initConvert()
+    this.getConvertConfig() 
     this.getApp()
     this.getPages()
     this.getSitemapLocation()
@@ -260,7 +262,7 @@ export default class Convertor {
               const node = astPath.node
               const source = node.source
               const value = source.value
-              analyzeImportUrl(self.root, sourceFilePath, scriptFiles, source, value, self.isTsProject)
+              analyzeImportUrl(self.root, sourceFilePath, scriptFiles, source, value,  self.external, self.miniprogramRoot, self.convertDir, self.isTsProject)
             },
             CallExpression (astPath) {
               const node = astPath.node
@@ -270,7 +272,7 @@ export default class Convertor {
                 if (callee.name === 'require') {
                   const args = node.arguments as Array<t.StringLiteral>
                   const value = args[0].value
-                  analyzeImportUrl(self.root, sourceFilePath, scriptFiles, args[0], value)
+                  analyzeImportUrl(self.root, sourceFilePath, scriptFiles, args[0], value, self.external, self.miniprogramRoot, self.convertDir, self.isTsProject)
                 } else if (WX_GLOBAL_FN.has(callee.name)) {
                   calleePath.replaceWith(t.memberExpression(t.identifier('Taro'), callee as t.Identifier))
                   needInsertImportTaro = true
@@ -384,6 +386,33 @@ export default class Convertor {
       scriptFiles,
     }
   }
+
+  getConvertConfig () { 
+    // 处理convert.config.json,转为绝对路径后存到external里
+    let convertJSONPath:string
+    if (this.isTsProject) {
+      convertJSONPath = path.join(this.miniprogramRoot, `convert.config${this.fileTypes.CONFIG}`)
+    } else {
+      convertJSONPath = path.join(this.root, `convert.config${this.fileTypes.CONFIG}`)
+    }
+    if (fs.existsSync(convertJSONPath)){
+      let convertJSON:string[]
+      try {
+        convertJSON= JSON.parse(String(fs.readFileSync(convertJSONPath)))
+        const externalJson = convertJSON.external
+        const absolute_path:string[] = []
+        for (const iRpath of externalJson){
+          // 相对路径转为绝对路径
+          absolute_path.push(path.resolve(convertJSONPath, '..', iRpath))
+        }
+        this.external=absolute_path
+      } catch (err) {
+        console.log(chalk.red(`convert.config${this.fileTypes.CONFIG} 读取失败，请检查！`))
+        process.exit(1)
+      }
+    }
+  }
+
 
   getApp () {
     if (this.isTsProject) {

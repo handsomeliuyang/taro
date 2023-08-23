@@ -60,14 +60,39 @@ function getRelativePath (rootPath: string, sourceFilePath: string, oriPath: str
   return oriPath
 }
 
+function copyFileToTaro (from: string, to: string, options?: fs.CopyOptionsSync) {
+  const filename = path.basename(from)
+  if (fs.statSync(from).isFile() && !path.extname(to)) {
+    fs.ensureDir(to)
+    return fs.copySync(from, path.join(to, filename), options)
+  }
+  fs.ensureDir(path.dirname(to))
+  return fs.copySync(from, to, options)
+}
+
 export function analyzeImportUrl (
   rootPath: string,
   sourceFilePath: string,
   scriptFiles: Set<string>,
   source: t.StringLiteral,
   value: string,
+  external:string[],
+  miniprogramRoot: string,
+  convertDir: string,
   isTsProject?: boolean
 ) {
+  const valueAbs:string = path.resolve(sourceFilePath, '..' ,value)
+  if (external){
+    for (const iExternal of external){
+      // value绝对路径包含json内绝对路径的dirname,就符合条件,直接copy文件过去
+      if(valueAbs.indexOf(path.dirname(iExternal))=== 0){
+        const outputFilePath = valueAbs.replace(isTsProject ? miniprogramRoot : rootPath, convertDir)
+        copyFileToTaro(valueAbs, outputFilePath)
+        // 直接return,不让此文件加入到scriptFiles里后续被转换
+        return
+      }
+    }
+  }  
   const valueExtname = path.extname(value)
   const rpath = getRelativePath(rootPath, sourceFilePath, value)
   if (!rpath) {
