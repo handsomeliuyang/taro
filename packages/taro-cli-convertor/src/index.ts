@@ -399,7 +399,7 @@ export default class Convertor {
       let convertJSON:string[]
       try {
         convertJSON= JSON.parse(String(fs.readFileSync(convertJSONPath)))
-        const externalJson = convertJSON.external
+        const externalJson = convertJSON['external']
         const absolute_path:string[] = []
         for (const iRpath of externalJson){
           // 相对路径转为绝对路径
