@@ -396,10 +396,9 @@ export default class Convertor {
       convertJSONPath = path.join(this.root, `convert.config${this.fileTypes.CONFIG}`)
     }
     if (fs.existsSync(convertJSONPath)){
-      let convertJSON:string[]
       try {
-        convertJSON= JSON.parse(String(fs.readFileSync(convertJSONPath)))
-        const externalJson = convertJSON['external']
+        const convertJSON= JSON.parse(String(fs.readFileSync(convertJSONPath)))
+        const externalJson = convertJSON.external
         const absolute_path:string[] = []
         for (const iRpath of externalJson){
           // 相对路径转为绝对路径
