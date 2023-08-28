@@ -9,3 +9,15 @@
     height: 300px;
     border:1px solid #000;
 }
+.canvas-content{
+    position: fixed;
+    background: #fff;
+    height: 400px;
+    border:1px solid #000;
+    z-index:100;
+    width: 89%;
+    top:0;
+  }
+  .api-content{
+    padding-top:400px;
+  }
