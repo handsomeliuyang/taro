@@ -29,14 +29,22 @@ function getRelativePath (rootPath: string, sourceFilePath: string, oriPath: str
     if (oriPath.indexOf('/') !== 0) {
       return ''
     }
-    const vpath = path.resolve(rootPath, oriPath.substr(1))
-    if (!fs.existsSync(vpath)) {
-      return ''
+    const wpath = path.resolve(sourceFilePath,'..' + oriPath + '.js')
+    const vpath = path.resolve(rootPath,oriPath.substr(1))
+    if(!fs.existsSync(vpath)){
+      if (!fs.existsSync(wpath)) {
+        return ''
+      }
     }
     let relativePath = path.relative(path.dirname(sourceFilePath), vpath)
+    let relativePath2 = path.relative(path.dirname(sourceFilePath), wpath)
     relativePath = promoteRelativePath(relativePath)
+    relativePath2 = promoteRelativePath(relativePath2)
     if (relativePath.indexOf('.') !== 0) {
       return './' + relativePath
+    }
+    if (relativePath2.indexOf('.') !== 0) {
+      return './' + relativePath2
     }
     return relativePath
   }
