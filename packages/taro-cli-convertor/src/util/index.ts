@@ -8,7 +8,7 @@ import {
   REG_SCRIPT,
   REG_TYPESCRIPT,
   resolveScriptPath,
-} from '@tarojs/helper'
+  SCRIPT_EXT } from '@tarojs/helper'
 import * as path from 'path'
 
 import type * as t from '@babel/types'
@@ -23,31 +23,38 @@ export function getPkgVersion (): string {
   return require(path.join(getRootPath(), 'package.json')).version
 }
 
-function getRelativePath (rootPath: string, sourceFilePath: string, oriPath: string) {
+function revertScriptPath (p: string, extArrs = SCRIPT_EXT): string {
+  for (let i = 0; i < extArrs.length; i++) {
+    const item = extArrs[i]
+    if (fs.existsSync(p)){
+      return p
+    } else if (fs.existsSync(`${p}${item}`)){
+      return `${p}${item}`
+    }
+  }
+  return ''
+}
+
+function getRelativePath (_rootPath: string, sourceFilePath: string, oriPath: string) {
   // 处理以/开头的绝对路径，比如 /a/b
   if (path.isAbsolute(oriPath)) {
     if (oriPath.indexOf('/') !== 0) {
       return ''
     }
-    const vpath = path.resolve(rootPath, oriPath.substr(1))
-    if (!fs.existsSync(vpath)) {
-      return ''
+    const absSearchPath = revertScriptPath(path.resolve(sourceFilePath, '..' + oriPath))
+    let absolutePath = path.relative(path.dirname(sourceFilePath), absSearchPath)
+    absolutePath = promoteRelativePath(absolutePath)
+    if (absolutePath.indexOf('.') !== 0) {
+      return './' + absolutePath
     }
-    let relativePath = path.relative(path.dirname(sourceFilePath), vpath)
-    relativePath = promoteRelativePath(relativePath)
-    if (relativePath.indexOf('.') !== 0) {
-      return './' + relativePath
-    }
-    return relativePath
+    return absolutePath
   }
   // 处理非正常路径，比如 a/b
   if (oriPath.indexOf('.') !== 0) {
-    const vpath = path.resolve(sourceFilePath, '..', oriPath)
-    if (fs.existsSync(vpath)) {
-      return `./${oriPath}`
-    } else if (fs.existsSync(`${vpath}.js`)) {
-      // 微信小程序中js文件的引用可不加后缀，需考虑
-      return `./${oriPath}.js`
+    const vpath = revertScriptPath(path.resolve(sourceFilePath, '..', oriPath))
+    const absolutePath = path.relative(path.dirname(sourceFilePath), vpath)
+    if (vpath) {
+      return `./${absolutePath}`
     }
   }
   return oriPath
