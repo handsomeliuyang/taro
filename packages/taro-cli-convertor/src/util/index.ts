@@ -8,12 +8,13 @@ import {
   REG_SCRIPT,
   REG_TYPESCRIPT,
   resolveScriptPath,
-} from '@tarojs/helper'
+  SCRIPT_EXT } from '@tarojs/helper'
 import * as path from 'path'
 
 import type * as t from '@babel/types'
 
 const NODE_MODULES = 'node_modules'
+const EXT_Arrs = SCRIPT_EXT
 
 export function getRootPath (): string {
   return path.resolve(__dirname, '../../')
@@ -23,31 +24,42 @@ export function getPkgVersion (): string {
   return require(path.join(getRootPath(), 'package.json')).version
 }
 
-function getRelativePath (rootPath: string, sourceFilePath: string, oriPath: string) {
+function revertScriptPath (absolutePath: string, EXT_Arrs: string[]): string {
+  // 查找以.js、.jsx、.ts、.tsx为后缀的文件
+  EXT_Arrs.forEach (item =>{
+    if (fs.existsSync(absolutePath)){
+      return absolutePath
+    } else if (fs.existsSync(`${absolutePath}${item}`)){
+      return `${absolutePath}${item}`
+    }
+  })
+  return absolutePath
+}
+
+function getRelativePath (_rootPath: string, sourceFilePath: string, oriPath: string) {
   // 处理以/开头的绝对路径，比如 /a/b
   if (path.isAbsolute(oriPath)) {
     if (oriPath.indexOf('/') !== 0) {
       return ''
     }
-    const vpath = path.resolve(rootPath, oriPath.substr(1))
-    if (!fs.existsSync(vpath)) {
-      return ''
+    const absolutePath = revertScriptPath(path.resolve(sourceFilePath, '..', oriPath), EXT_Arrs)
+    if (absolutePath) {
+      let relativePath = path.relative(path.dirname(sourceFilePath), absolutePath)
+      relativePath = promoteRelativePath(relativePath)
+      if (relativePath.indexOf('.') !== 0) {
+        return `./${relativePath}`
+      }
+    } else {
+      return absolutePath
     }
-    let relativePath = path.relative(path.dirname(sourceFilePath), vpath)
-    relativePath = promoteRelativePath(relativePath)
-    if (relativePath.indexOf('.') !== 0) {
-      return './' + relativePath
-    }
-    return relativePath
   }
   // 处理非正常路径，比如 a/b
   if (oriPath.indexOf('.') !== 0) {
-    const vpath = path.resolve(sourceFilePath, '..', oriPath)
-    if (fs.existsSync(vpath)) {
-      return `./${oriPath}`
-    } else if (fs.existsSync(`${vpath}.js`)) {
-      // 微信小程序中js文件的引用可不加后缀，需考虑
-      return `./${oriPath}.js`
+    const absolutePath = revertScriptPath(path.resolve(sourceFilePath, '..', oriPath), EXT_Arrs)
+    if (absolutePath) {
+      return oriPath
+    } else {
+      return absolutePath
     }
   }
   return oriPath
