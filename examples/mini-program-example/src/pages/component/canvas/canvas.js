@@ -47,7 +47,6 @@ const PageView = () => {
           <View className='page-section-spacing'>
             <View className='page-body-wrapper'>
               <Canvas
-                type='2d'
                 canvasId='canvas2D'
                 className='canvas'
                 width='305px'
