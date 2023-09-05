@@ -8,7 +8,7 @@ import {
   REG_SCRIPT,
   REG_TYPESCRIPT,
   resolveScriptPath,
-} from '@tarojs/helper'
+  SCRIPT_EXT } from '@tarojs/helper'
 import * as path from 'path'
 
 import type * as t from '@babel/types'
@@ -23,29 +23,39 @@ export function getPkgVersion (): string {
   return require(path.join(getRootPath(), 'package.json')).version
 }
 
-function getRelativePath (rootPath: string, sourceFilePath: string, oriPath: string) {
+function revertScriptPath (absolutePath: string, SCRIPT_EXT: string[]): string {
+  let result = absolutePath
+  // 文件存在或添加后缀.js、.jsx、.ts、.tsx存在则返回文件路径
+  SCRIPT_EXT.forEach (item =>{
+    if (fs.existsSync(absolutePath)){
+      result = absolutePath
+    } else if (fs.existsSync(`${absolutePath}${item}`)){
+      result = `${absolutePath}${item}`
+    }
+  })
+  return result
+}
+
+function getRelativePath (_rootPath: string, sourceFilePath: string, oriPath: string) {
   // 处理以/开头的绝对路径，比如 /a/b
   if (path.isAbsolute(oriPath)) {
     if (oriPath.indexOf('/') !== 0) {
       return ''
     }
-    const vpath = path.resolve(rootPath, oriPath.substr(1))
-    if (!fs.existsSync(vpath)) {
-      return ''
-    }
-    let relativePath = path.relative(path.dirname(sourceFilePath), vpath)
+    const absolutePath = revertScriptPath(path.resolve(sourceFilePath, '..' + oriPath), SCRIPT_EXT)
+    let relativePath = path.relative(path.dirname(sourceFilePath), absolutePath)
     relativePath = promoteRelativePath(relativePath)
     if (relativePath.indexOf('.') !== 0) {
-      return './' + relativePath
+      return `./${relativePath}`
     }
     return relativePath
   }
   // 处理非正常路径，比如 a/b
   if (oriPath.indexOf('.') !== 0) {
-    const vpath = path.resolve(sourceFilePath, '..', oriPath)
-    if (fs.existsSync(vpath)) {
+    const absolutePath = path.resolve(sourceFilePath, '..', oriPath)
+    if (fs.existsSync(absolutePath)) {
       return `./${oriPath}`
-    } else if (fs.existsSync(`${vpath}.js`)) {
+    } else if (fs.existsSync(`${absolutePath}.js`)) {
       // 微信小程序中js文件的引用可不加后缀，需考虑
       return `./${oriPath}.js`
     }
