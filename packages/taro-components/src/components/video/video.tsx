@@ -335,7 +335,7 @@ export class Video implements ComponentInterface {
 
     if (isHls(src)) {
       import(
-        /* webpackMode: "weak" */
+        /* webpackExports: ["default"] */
         'hls.js'
       ).then(e => {
         const Hls = e.default
@@ -537,7 +537,6 @@ export class Video implements ComponentInterface {
 
   toggleFullScreen = (isFullScreen = !this.isFullScreen) => {
     this.isFullScreen = isFullScreen // this.videoRef?.['webkitDisplayingFullscreen']
-    console.log('1111111:' + this.isFullScreen)
     this.controlsRef.toggleVisibility(true)
     this.fullScreenTimestamp = new Date().getTime()
     this.onFullScreenChange.emit({
@@ -548,6 +547,8 @@ export class Video implements ComponentInterface {
       setTimeout(() => {
         this.videoRef[screenFn.requestFullscreen]({ navigationUI: 'auto' })
       }, 0)
+    } else {
+      document[screenFn.exitFullscreen]()
     }
   }
 
