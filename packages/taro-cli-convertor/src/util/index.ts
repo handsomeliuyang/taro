@@ -14,6 +14,7 @@ import * as path from 'path'
 import type * as t from '@babel/types'
 
 const NODE_MODULES = 'node_modules'
+const extArrs = SCRIPT_EXT
 
 export function getRootPath (): string {
   return path.resolve(__dirname, '../../')
@@ -23,13 +24,13 @@ export function getPkgVersion (): string {
   return require(path.join(getRootPath(), 'package.json')).version
 }
 
-function revertScriptPath (p: string, extArrs = SCRIPT_EXT): string {
+function revertScriptPath (relativePath: string, extArrs: string[]): string {
+  // 在js、jsx、ts、tsx的后缀查找
   for (let i = 0; i < extArrs.length; i++) {
-    const item = extArrs[i]
-    if (fs.existsSync(p)){
-      return p
-    } else if (fs.existsSync(`${p}${item}`)){
-      return `${p}${item}`
+    if (fs.existsSync(relativePath)){
+      return relativePath
+    } else if (fs.existsSync(`${relativePath}${extArrs[i]}`)){
+      return `${relativePath}${extArrs[i]}`
     }
   }
   return ''
@@ -41,20 +42,25 @@ function getRelativePath (_rootPath: string, sourceFilePath: string, oriPath: st
     if (oriPath.indexOf('/') !== 0) {
       return ''
     }
-    const absSearchPath = revertScriptPath(path.resolve(sourceFilePath, '..' + oriPath))
-    let absolutePath = path.relative(path.dirname(sourceFilePath), absSearchPath)
-    absolutePath = promoteRelativePath(absolutePath)
-    if (absolutePath.indexOf('.') !== 0) {
-      return './' + absolutePath
+    const searchPath = revertScriptPath(path.resolve(sourceFilePath, '..' + oriPath),extArrs)
+    if (searchPath) {
+      let absolutePath = path.relative(path.dirname(sourceFilePath), searchPath)
+      absolutePath = promoteRelativePath(absolutePath)
+      if (absolutePath.indexOf('.') !== 0) {
+        return `./${absolutePath}`
+      }
+    } else {
+      return ''
     }
-    return absolutePath
   }
   // 处理非正常路径，比如 a/b
   if (oriPath.indexOf('.') !== 0) {
-    const vpath = revertScriptPath(path.resolve(sourceFilePath, '..', oriPath))
-    const absolutePath = path.relative(path.dirname(sourceFilePath), vpath)
+    const vpath = revertScriptPath(path.resolve(sourceFilePath, '..', oriPath),extArrs)
+    const relativePath = path.relative(path.dirname(sourceFilePath), vpath)
     if (vpath) {
-      return `./${absolutePath}`
+      return `./${relativePath}`
+    } else {
+      return ''
     }
   }
   return oriPath
