@@ -24,7 +24,6 @@ export default class Index extends React.Component {
               var tempFilePaths = res.tempFilePaths
               Taro.saveFile({
                 tempFilePath: tempFilePaths[0],
-                filePath: 'D:/common',
                 success: (res) => {
                   TestConsole.consoleSuccess.call(this, res, apiIndex)
                 },
@@ -37,6 +36,29 @@ export default class Index extends React.Component {
               }).then((res) => {
                 TestConsole.consoleReturn.call(this, res, apiIndex)
               })
+            },
+          })
+        },
+      },
+      {
+        id: 'openDocument',
+        inputData: {
+          filePath: '',
+          showMenu: false,
+          fileType: []
+        },
+        func: (apiIndex, data) => {
+          TestConsole.consoleTest('openDocument')
+          Taro.openDocument({
+            ...data,
+            success: (res) => {
+              TestConsole.consoleSuccess.call(this, res, apiIndex)
+            },
+            fail: (res) => {
+              TestConsole.consoleFail.call(this, res, apiIndex)
+            },
+            complete: (res) => {
+              TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           })
         },
@@ -418,7 +440,6 @@ export default class Index extends React.Component {
               var tempFilePaths = res.tempFilePaths
               Taro.saveFile({
                 tempFilePath: tempFilePaths[0],
-                filePath: 'D:/common',
                 success: (res) => {
                   TestConsole.consoleNormal('saveFile success ', res)
                   fileSystemManager.getFileInfo({
@@ -447,62 +468,46 @@ export default class Index extends React.Component {
       },
       {
         id: 'fileSystem_readFile',
-        func: (apiIndex) => {
+        inputData: {
+          filePath: '',
+          position: 0,
+          length: 1,
+          encoding: '',
+        },
+        func: (apiIndex, data) => {
           TestConsole.consoleTest('fileSystem_readFile')
-          Taro.chooseImage({
+          fileSystemManager.readFile({
+            ...data,
             success: (res) => {
-              var tempFilePaths = res.tempFilePaths
-              Taro.saveFile({
-                tempFilePath: tempFilePaths[0],
-                filePath: 'D:/common',
-                success: (res) => {
-                  TestConsole.consoleNormal('saveFile success ', res)
-                  fileSystemManager.readFile({
-                    filePath: res.savedFilePath,
-                    position: 0,
-                    length: 1,
-                    encoding: '',
-                    success: (res) => {
-                      TestConsole.consoleSuccess.call(this, res, apiIndex)
-                    },
-                    fail: (res) => {
-                      TestConsole.consoleFail.call(this, res, apiIndex)
-                    },
-                    complete: (res) => {
-                      TestConsole.consoleComplete.call(this, res, apiIndex)
-                    },
-                  })
-                },
-                fail: (res) => {
-                  TestConsole.consoleNormal('saveFile fail ', res.errMsg)
-                },
-                complete: (res) => {
-                  TestConsole.consoleNormal('saveFile complete ', res)
-                },
-              })
+              TestConsole.consoleSuccess.call(this, res, apiIndex)
+            },
+            fail: (res) => {
+              TestConsole.consoleFail.call(this, res, apiIndex)
+            },
+            complete: (res) => {
+              TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           })
         },
       },
       {
         id: 'fileSystem_readFileSync',
-        func: (apiIndex) => {
+        inputData: {
+          encoding: '',
+          position: 1,
+          length: 1000,
+        },
+        func: (apiIndex, data) => {
           TestConsole.consoleTest('fileSystem_readFileSync')
           Taro.chooseImage({
             success: (res) => {
               var tempFilePaths = res.tempFilePaths
               Taro.saveFile({
                 tempFilePath: tempFilePaths[0],
-                filePath: 'D:/common',
                 success: function (sucRes) {
                   TestConsole.consoleNormal('saveFile success ', sucRes)
-                  str = fileSystemManager.readFileSync({
-                    filePath: sucRes.savedFilePath,
-                    encoding: '',
-                    position: 0,
-                    length: 1,
-                  })
-                  TestConsole.consoleNormal('readFileSync success ', str)
+                  fileSystemManager.readFileSync(sucRes.savedFilePath, data.encoding, data.position, data.length)
+                  TestConsole.consoleNormal('readFileSync success ')
                 },
                 fail: function (failRes) {
                   TestConsole.consoleNormal('saveFile fail ', failRes.errMsg)
@@ -517,7 +522,7 @@ export default class Index extends React.Component {
       },
     ],
   }
-  render() {
+  render () {
     const { list } = this.state
     return (
       <View className='api-page'>
