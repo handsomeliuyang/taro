@@ -1,4 +1,6 @@
 import * as t from '@babel/types'
+import { promoteRelativePath } from '@tarojs/helper'
+import * as path from 'path'
 
 import { errors, resetGlobals, THIRD_PARTY_COMPONENTS } from './global'
 import { parseScript } from './script'
@@ -43,6 +45,18 @@ export function parse (option: Option) {
   const { wxml, wxses, imports, refIds } = parseWXML(option.path, option.wxml)
   setting.sourceCode = option.script!
   const ast = parseScript(option.script, option.scriptPath, wxml as t.Expression, wxses, refIds, option.isApp)
+
+  // 添加 cacheOptions 引入语句
+  if ( option.scriptPath ) {
+    const currentPath = option.scriptPath || ''
+    const cacheOptionsPath = path.resolve(option.rootPath, 'utils', '_cacheOptions.js')
+    const importCacheOptionsUrl = promoteRelativePath(path.relative(currentPath, cacheOptionsPath))
+    const importCacheOptionsAst = t.importDeclaration([
+      t.importSpecifier(t.identifier('cacheOptions'), t.identifier('cacheOptions'))
+    ], t.stringLiteral(importCacheOptionsUrl))
+    ast.program.body.unshift(importCacheOptionsAst)
+  }
+
   return {
     ast,
     imports,
