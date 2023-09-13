@@ -196,10 +196,7 @@ function parsePage (
 
   // @withWeapp 通过调用 cacheOptions.getOptionsFromCache() 获取 options
   const withWeappArgmentNode = t.callExpression(
-    t.memberExpression(
-      t.identifier('cacheOptions'),
-      t.identifier('getOptionsFromCache'),
-    ),
+    t.memberExpression(t.identifier('cacheOptions'), t.identifier('getOptionsFromCache')),
     []
   )
   classDecl.decorators = [buildDecorator(withWeappArgmentNode, isApp)]
