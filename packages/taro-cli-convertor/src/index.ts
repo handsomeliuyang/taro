@@ -192,7 +192,7 @@ export default class Convertor {
   wxsIncrementId = incrementId()
 
   // 创建 cacheOptions 文件
-  buildCacheOptionFile (): void {
+  generateCacheOptionFile (): void {
     const cacheOptionsTemplate = `
   export const cacheOptions = {
     cacheOptions: {},
@@ -207,10 +207,12 @@ export default class Convertor {
   }      
    `
     const utilsPath = path.join(this.root, 'taroConvert/src/utils/')
-    if (!fs.existsSync(utilsPath)) {
-      fs.mkdirSync(utilsPath)
-    } 
-    fs.writeFileSync(path.join(utilsPath, '_cacheOptions.js'), cacheOptionsTemplate)
+    const cacheOptionsPath = path.join(utilsPath, '_cacheOptions.js')
+
+    if (!fs.existsSync(cacheOptionsPath)) {
+      fs.mkdirSync(utilsPath, { recursive: true })
+      fs.writeFileSync(cacheOptionsPath, cacheOptionsTemplate)
+    }
   }
 
   parseAst ({ ast, sourceFilePath, outputFilePath, importStylePath, depComponents, imports = [] }: IParseAstOptions): {
@@ -323,7 +325,7 @@ export default class Convertor {
                   callee.name === 'Component' ||
                   callee.name === 'App'
                 ) {
-                  // 对使用工具函数初始化 Page 数据做处理
+                  // 将 App() Page() Component() 改为 cacheOptions.setOptionsToCache() 的形式去初始化页面数据
                   const arg = astPath.get('arguments')[0]
                   const cacheOptionsAstNode = t.callExpression(
                     t.memberExpression(
@@ -334,7 +336,7 @@ export default class Convertor {
                   )
                   astPath.replaceWith(cacheOptionsAstNode)
                   
-                  // 创建 requireCacheOptions 导入节点
+                  // 创建导入 cacheOptions 对象的 ast 节点
                   const currentFilePath = sourceFilePath
                   const cacheOptionsPath = path.resolve(self.root, 'utils','_cacheOptions.js')
                   const importOptionsUrl = promoteRelativePath(path.relative(currentFilePath, cacheOptionsPath))
@@ -353,6 +355,9 @@ export default class Convertor {
                     ast.program.body.unshift(requireCacheOptionsAst)
                     hasCacheOptionsRequired = true
                   }
+                  
+                  self.generateCacheOptionFile()
+
                 }
               } else if (callee.type === 'MemberExpression') {
                 // find this.setData({}) ,includes this & _this
@@ -1059,14 +1064,14 @@ ${code}
           imports: taroizeResult.imports,
         })
 
-        // 创建 cacheOptions 导入节点
-        const currentFilePath = componentJSPath
-        const cacheOptionsPath = path.resolve(param.rootPath, 'utils','_cacheOptions.js')
-        const importOptionsUrl = promoteRelativePath(path.relative(currentFilePath, cacheOptionsPath))
-        const importCacheOptionsAst = t.importDeclaration([
-          t.importSpecifier(t.identifier('cacheOptions'), t.identifier('cacheOptions'))
-        ], t.stringLiteral(importOptionsUrl))
-        ast.program.body.unshift(importCacheOptionsAst)
+        // // 创建 cacheOptions 导入节点
+        // const currentFilePath = componentJSPath
+        // const cacheOptionsPath = path.resolve(param.rootPath, 'utils','_cacheOptions.js')
+        // const importOptionsUrl = promoteRelativePath(path.relative(currentFilePath, cacheOptionsPath))
+        // const importCacheOptionsAst = t.importDeclaration([
+        //   t.importSpecifier(t.identifier('cacheOptions'), t.identifier('cacheOptions'))
+        // ], t.stringLiteral(importOptionsUrl))
+        // ast.program.body.unshift(importCacheOptionsAst)
 
         const jsCode = generateMinimalEscapeCode(ast)
         this.writeFileToTaro(
@@ -1242,7 +1247,6 @@ ${code}
     this.framework = 'react'
     this.generateEntry()
     this.traversePages()
-    this.buildCacheOptionFile()
     this.generateConfigFiles()
   }
 }

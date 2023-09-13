@@ -2,7 +2,7 @@ import traverse, { NodePath, Visitor } from '@babel/traverse'
 import * as t from '@babel/types'
 
 import { usedComponents } from './global'
-import { buildBlockElement, buildImportStatement, buildRender, codeFrameError, parseCode } from './utils'
+import { buildBlockElement, buildImportStatement, buildRender, parseCode } from './utils'
 import { WXS } from './wxml'
 
 const defaultClassName = '_C'
@@ -74,24 +74,6 @@ export function parseScript (
           classDecl,
           t.exportDefaultDeclaration(t.identifier(componentType !== 'App' ? defaultClassName : 'App'))
         )
-
-        const arg = path.get('arguments')[0]
-        if (arg.isObjectExpression() || arg.isIdentifier()) {
-          //
-        } else {
-          throw codeFrameError(arg.node, `${componentType || '组件'} 的第一个参数必须是一个对象或变量才能转换。`)
-        }
-        // path.insertAfter(t.exportDefaultDeclaration(t.identifier(defaultClassName)))
-
-        // 将 Page 函数中参数传递给 setOptionsToCache
-        const cacheOptionsAstNode = t.callExpression(
-          t.memberExpression(
-            t.identifier('cacheOptions'),
-            t.identifier('setOptionsToCache'),
-          ),
-          [arg.node]
-        )
-        path.replaceWith(cacheOptionsAstNode)
       }
     },
     VariableDeclaration (path) {
