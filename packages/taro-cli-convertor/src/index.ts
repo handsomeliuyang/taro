@@ -320,33 +320,25 @@ export default class Convertor {
                 } else if (WX_GLOBAL_FN.has(callee.name)) {
                   calleePath.replaceWith(t.memberExpression(t.identifier('Taro'), callee as t.Identifier))
                   needInsertImportTaro = true
-                } else if (
-                  callee.name === 'Page' ||
-                  callee.name === 'Component' ||
-                  callee.name === 'App'
-                ) {
+                } else if (callee.name === 'Page' || callee.name === 'Component' || callee.name === 'App') {
                   // 将 App() Page() Component() 改为 cacheOptions.setOptionsToCache() 的形式去初始化页面数据
                   const arg = astPath.get('arguments')[0]
                   const cacheOptionsAstNode = t.callExpression(
-                    t.memberExpression(
-                      t.identifier('cacheOptions'),
-                      t.identifier('setOptionsToCache')
-                    ),
+                    t.memberExpression(t.identifier('cacheOptions'), t.identifier('setOptionsToCache')),
                     [arg.node]
                   )
                   astPath.replaceWith(cacheOptionsAstNode)
-                  
+
                   // 创建导入 cacheOptions 对象的 ast 节点
                   const currentFilePath = sourceFilePath
-                  const cacheOptionsPath = path.resolve(self.root, 'utils','_cacheOptions.js')
+                  const cacheOptionsPath = path.resolve(self.root, 'utils', '_cacheOptions.js')
                   const importOptionsUrl = promoteRelativePath(path.relative(currentFilePath, cacheOptionsPath))
                   const requireCacheOptionsAst = t.variableDeclaration('const', [
                     t.variableDeclarator(
-                      t.objectPattern([ t.objectProperty(t.identifier('cacheOptions'), t.identifier('cacheOptions'), false, true)]),
-                      t.callExpression(
-                        t.identifier('require'),
-                        [t.stringLiteral(importOptionsUrl)] 
-                      )
+                      t.objectPattern([
+                        t.objectProperty(t.identifier('cacheOptions'), t.identifier('cacheOptions'), false, true),
+                      ]),
+                      t.callExpression(t.identifier('require'), [t.stringLiteral(importOptionsUrl)])
                     ),
                   ])
 
@@ -355,9 +347,8 @@ export default class Convertor {
                     ast.program.body.unshift(requireCacheOptionsAst)
                     hasCacheOptionsRequired = true
                   }
-                  
-                  self.generateCacheOptionFile()
 
+                  self.generateCacheOptionFile()
                 }
               } else if (callee.type === 'MemberExpression') {
                 // find this.setData({}) ,includes this & _this
@@ -768,7 +759,7 @@ ${code}
         isApp: true,
       })
       const { ast, scriptFiles } = this.parseAst({
-        ast: taroizeResult.ast, 
+        ast: taroizeResult.ast,
         sourceFilePath: this.entryJSPath,
         outputFilePath: entryDistJSPath,
         importStylePath: this.entryStyle
@@ -1063,15 +1054,6 @@ ${code}
           depComponents,
           imports: taroizeResult.imports,
         })
-
-        // // 创建 cacheOptions 导入节点
-        // const currentFilePath = componentJSPath
-        // const cacheOptionsPath = path.resolve(param.rootPath, 'utils','_cacheOptions.js')
-        // const importOptionsUrl = promoteRelativePath(path.relative(currentFilePath, cacheOptionsPath))
-        // const importCacheOptionsAst = t.importDeclaration([
-        //   t.importSpecifier(t.identifier('cacheOptions'), t.identifier('cacheOptions'))
-        // ], t.stringLiteral(importOptionsUrl))
-        // ast.program.body.unshift(importCacheOptionsAst)
 
         const jsCode = generateMinimalEscapeCode(ast)
         this.writeFileToTaro(
