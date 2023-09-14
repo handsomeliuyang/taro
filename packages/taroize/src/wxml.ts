@@ -139,7 +139,7 @@ function parseStyleAttrs (styleAttrsMap: any[], path: NodePath<t.JSXAttribute>) 
   })
 }
 
-function transUnit (path: NodePath<t.JSXAttribute>) {
+function convertStyleUnit (path: NodePath<t.JSXAttribute>) {
   // 尺寸单位转换 都转为rem : 1rpx 转为 1/40rem,,1px 转为 1/20rem
   if (t.isStringLiteral(path.node.value)) {
     let tempValue = path.node.value.value
@@ -199,7 +199,7 @@ export const createWxmlVistor = (
     }
 
     // 把wxml中的 xx = "...rpx" / xx = "...px" 的单位都转为rem
-    transUnit(path)
+    convertStyleUnit(path)
 
     // 把 style 中 {{}} 转为 ${} 格式
     if (name.name === 'style' && t.isStringLiteral(path.node.value)) {
