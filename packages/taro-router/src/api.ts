@@ -42,8 +42,17 @@ async function navigate (option: Option | NavigateBackOption, method: MethodName
   return new Promise<TaroGeneral.CallbackResult>((resolve, reject) => {
     stacks.method = method
     const { success, complete, fail } = option
+    const  eventChannel : TaroGeneral.eventChannel = {
+      emit (): void{},
+      on (): void{},
+      once (): void{},
+      off (): void{}
+    }
     const unListen = history.listen(() => {
-      const res = { errMsg: `${method}:ok` }
+      const res = { 
+        errMsg: `${method}:ok` ,
+        eventChannel : eventChannel 
+      }
       success?.(res)
       complete?.(res)
       resolve(res)
