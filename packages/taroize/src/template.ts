@@ -17,8 +17,7 @@ export function buildTemplateName (name: string, pascal = true): string {
   if (/wx/i.test(name)) {
     return buildTemplateName('taro-' + name.slice(2, name.length))
   }
-  const words = pascal ? pascalName(name + '-tmpl') : name + '-tmpl'
-  // return words
+  const words = pascal ? pascalName(name.toLocaleLowerCase() + 'tmpl') : name + 'tmpl'
   const str: string[] = []
   for (const word of words) {
     if (isNumeric(word)) {
