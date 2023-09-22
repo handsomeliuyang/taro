@@ -9,7 +9,7 @@ import { camelCase, cloneDeep } from 'lodash'
 
 import { getCacheWxml, saveCacheWxml } from './cache'
 import { reserveKeyWords } from './constant'
-import { specialEvents } from './events'
+import { specialEvents, specialSameEvents } from './events'
 import { errors, globals, THIRD_PARTY_COMPONENTS, usedComponents } from './global'
 import { parseModule, parseTemplate } from './template'
 import {
@@ -994,6 +994,8 @@ function handleAttrKey (key: string) {
   } else if (/^(bind|catch)[a-z|:]/.test(key)) {
     if (specialEvents.has(key)) {
       return specialEvents.get(key)!
+    } else if (specialSameEvents.has(key)) {
+      return specialSameEvents.get(key)!
     } else {
       key = key.replace(/^(bind:|catch:|bind|catch)/, 'on')
       key = camelCase(key)
