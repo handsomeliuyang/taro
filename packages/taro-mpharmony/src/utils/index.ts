@@ -56,7 +56,7 @@ interface IParameterErrorParam {
 }
 export function getParameterError ({ name = '', para, correct, wrong }: IParameterErrorParam) {
   const parameter = para ? `parameter.${para}` : 'parameter'
-  const errorType = upperCaseFirstLetter(wrong === null ? 'Null' : typeof wrong)
+  const errorType = upperCaseFirstLetter(wrong === null ? 'Null' : wrong)
   if (name) {
     return `${name}:fail parameter error: ${parameter} should be ${correct} instead of ${errorType}`
   } else {
@@ -91,10 +91,9 @@ export function serializeParams (params) {
   return Object.keys(params)
     .map(
       (key) =>
-        `${encodeURIComponent(key)}=${
-          typeof params[key] === 'object'
-            ? encodeURIComponent(JSON.stringify(params[key]))
-            : encodeURIComponent(params[key])
+        `${encodeURIComponent(key)}=${typeof params[key] === 'object'
+          ? encodeURIComponent(JSON.stringify(params[key]))
+          : encodeURIComponent(params[key])
         }`
     )
     .join('&')
