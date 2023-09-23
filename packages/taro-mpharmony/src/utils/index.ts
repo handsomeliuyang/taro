@@ -91,10 +91,9 @@ export function serializeParams (params) {
   return Object.keys(params)
     .map(
       (key) =>
-        `${encodeURIComponent(key)}=${
-          typeof params[key] === 'object'
-            ? encodeURIComponent(JSON.stringify(params[key]))
-            : encodeURIComponent(params[key])
+        `${encodeURIComponent(key)}=${typeof params[key] === 'object'
+          ? encodeURIComponent(JSON.stringify(params[key]))
+          : encodeURIComponent(params[key])
         }`
     )
     .join('&')
