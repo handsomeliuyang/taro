@@ -56,7 +56,7 @@ interface IParameterErrorParam {
 }
 export function getParameterError ({ name = '', para, correct, wrong }: IParameterErrorParam) {
   const parameter = para ? `parameter.${para}` : 'parameter'
-  const errorType = upperCaseFirstLetter(wrong === null ? 'Null' : wrong)
+  const errorType = upperCaseFirstLetter(wrong === null ? 'Null' : typeof wrong)
   if (name) {
     return `${name}:fail parameter error: ${parameter} should be ${correct} instead of ${errorType}`
   } else {

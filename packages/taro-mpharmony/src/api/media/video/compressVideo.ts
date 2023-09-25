@@ -39,11 +39,11 @@ export const compressVideo: typeof Taro.compressVideo = (options) => {
       }),
     })
   }
-  if (quality !== 'low' && quality !== 'medium' && quality !== 'high') {
+  if (quality !== 'string') {
     return handle.fail({
       errMsg: getParameterError({
         para: 'quality',
-        correct: 'low medium or high',
+        correct: 'string',
         wrong: quality,
       }),
     })
