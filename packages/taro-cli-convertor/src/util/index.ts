@@ -10,11 +10,17 @@ import {
   resolveScriptPath,
   SCRIPT_EXT,
 } from '@tarojs/helper'
+import { camelCase, capitalize } from 'lodash'
 import * as path from 'path'
 
 import type * as t from '@babel/types'
 
 const NODE_MODULES = 'node_modules'
+
+export function pascalName (s: string) {
+  const str = camelCase(s)
+  return capitalize(str[0]) + str.slice(1)
+}
 
 export function getRootPath (): string {
   return path.resolve(__dirname, '../../')
