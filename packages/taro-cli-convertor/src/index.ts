@@ -34,8 +34,8 @@ import {
   handleThirdPartyLib,
   handleUnconvertDir,
   incrementId,
-  transRelToAbsPath,
-} from './util'
+  pascalName,
+  transRelToAbsPath } from './util'
 import { generateMinimalEscapeCode, hasTaroImport, isCommonjsModule } from './util/astConvert'
 
 import type { ParserOptions } from '@babel/parser'
@@ -462,7 +462,7 @@ export default class Convertor {
             }
             if (imports && imports.length) {
               imports.forEach(({ name, ast, wxs }) => {
-                const importName = wxs ? name : pascalCase(name)
+                const importName = wxs ? name : pascalName(name)
                 if (componentClassName === importName) {
                   return
                 }
