@@ -1000,6 +1000,9 @@ importers:
       '@tarojs/transformer-wx':
         specifier: workspace:*
         version: link:../taro-transformer-wx
+      lodash:
+        specifier: ^4.17.21
+        version: registry.npmjs.org/lodash@4.17.21
       postcss:
         specifier: ^8.4.18
         version: registry.npmjs.org/postcss@8.4.23
@@ -17111,6 +17114,7 @@ packages:
     resolution: {integrity: sha512-d0II/GO9uf9lfUHH2BQsjxzRJZBdsjgsBiW4BvhWk/3qoKwQFjIDVN19PfX8F2D/r9PCMTtLWjYVCFrpeYUzsw==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/boolean/-/boolean-3.2.0.tgz}
     name: boolean
     version: 3.2.0
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -21272,6 +21276,7 @@ packages:
     resolution: {integrity: sha512-Um/+FxMr9CISWh0bi5Zv0iOD+4cFh5qLeks1qhAopKVAJw3drgKbKySikp7wGhDL0HPeaja0P5ULZrxLkniUVg==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/es6-error/-/es6-error-4.1.1.tgz}
     name: es6-error
     version: 4.1.1
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -23921,6 +23926,7 @@ packages:
     resolution: {integrity: sha512-MKZeRNyYZAVVVG1oZeLaWie1uweH40m9AZwIwxyPbTSX4hHrVYSzLg0Ro5Z5R7XKkIX+Cc6oD1rqeDJnwsB8/A==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/glob/-/glob-6.0.4.tgz}
     name: glob
     version: 6.0.4
+    requiresBuild: true
     dependencies:
       inflight: registry.npmjs.org/inflight@1.0.6
       inherits: registry.npmjs.org/inherits@2.0.4
@@ -24299,6 +24305,7 @@ packages:
     resolution: {integrity: sha512-+xGQY0YyAWCnqy7Cd++hc2JqMYzlm0dG30Jd0beaA64sROr8C4nt8Yc9V5Ro3avlSUDTN0ulqP/VBKi1/lLygw==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/growly/-/growly-1.3.0.tgz}
     name: growly
     version: 1.3.0
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -29452,6 +29459,7 @@ packages:
     name: matcher
     version: 3.0.0
     engines: {node: '>=10'}
+    requiresBuild: true
     dependencies:
       escape-string-regexp: registry.npmjs.org/escape-string-regexp@4.0.0
     dev: false
@@ -30785,6 +30793,7 @@ packages:
     name: ncp
     version: 2.0.0
     hasBin: true
+    requiresBuild: true
     optional: true
 
   registry.npmjs.org/needle@3.2.0:
@@ -33710,6 +33719,7 @@ packages:
     resolution: {integrity: sha512-yPw4Sng1gWghHQWj0B3ZggWUm4qVbPwPFcRG8KyxiU7J2OHFSoEHKS+EZ3fv5l1t9CyCiop6l/ZYeWbrgoQejw==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/prr/-/prr-1.0.1.tgz}
     name: prr
     version: 1.0.1
+    requiresBuild: true
 
   registry.npmjs.org/pseudomap@1.0.2:
     resolution: {integrity: sha512-b/YwNhb8lk1Zz2+bXXpS/LK9OisiZZ1SNsSLxN1x2OXVEhW2Ckr/7mWE5vrC1ZTiJlD9g19jWszTmJsB+oEpFQ==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/pseudomap/-/pseudomap-1.0.2.tgz}
@@ -35617,6 +35627,7 @@ packages:
     name: rimraf
     version: 2.4.5
     hasBin: true
+    requiresBuild: true
     dependencies:
       glob: registry.npmjs.org/glob@6.0.4
     optional: true
@@ -35678,6 +35689,7 @@ packages:
     name: roarr
     version: 2.15.4
     engines: {node: '>=8.0'}
+    requiresBuild: true
     dependencies:
       boolean: registry.npmjs.org/boolean@3.2.0
       detect-node: registry.npmjs.org/detect-node@2.1.0
@@ -36433,6 +36445,7 @@ packages:
     name: serialize-error
     version: 7.0.1
     engines: {node: '>=10'}
+    requiresBuild: true
     dependencies:
       type-fest: registry.npmjs.org/type-fest@0.13.1
     dev: false
@@ -36612,6 +36625,7 @@ packages:
     resolution: {integrity: sha512-vFwSUfQvqybiICwZY5+DAWIPLKsWO31Q91JSKl3UYv+K5c2QRPzn0qzec6QPu1Qc9eHYItiP3NdJqNVqetYAww==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/shellwords/-/shellwords-0.1.1.tgz}
     name: shellwords
     version: 0.1.1
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -37097,6 +37111,7 @@ packages:
     resolution: {integrity: sha512-VE0SOVEHCk7Qc8ulkWw3ntAzXuqf7S2lvwQaDLRnUeIEaKNQJzV6BwmLKhOqT61aGhfUMrXeaBk+oDGCzvhcug==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/sprintf-js/-/sprintf-js-1.1.2.tgz}
     name: sprintf-js
     version: 1.1.2
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -39021,6 +39036,7 @@ packages:
     name: tunnel
     version: 0.0.6
     engines: {node: '>=0.6.11 <=0.7.0 || >=0.7.3'}
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -39063,6 +39079,7 @@ packages:
     name: type-fest
     version: 0.13.1
     engines: {node: '>=10'}
+    requiresBuild: true
     dev: false
     optional: true
 
@@ -40342,7 +40359,7 @@ packages:
       mime-types: registry.npmjs.org/mime-types@2.1.35
       range-parser: registry.npmjs.org/range-parser@1.2.1
       schema-utils: registry.npmjs.org/schema-utils@4.0.1
-      webpack: registry.npmjs.org/webpack@5.78.0(@swc/core@1.3.42)(webpack-cli@5.0.1)
+      webpack: registry.npmjs.org/webpack@5.78.0
 
   registry.npmjs.org/webpack-dev-server@3.11.3(webpack@4.46.0):
     resolution: {integrity: sha512-3x31rjbEQWKMNzacUZRE6wXvUFuGpH7vr0lIEbYpMAG9BOxi0928QU1BBswOAP3kg3H1O4hiS+sq4YyAn6ANnA==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/webpack-dev-server/-/webpack-dev-server-3.11.3.tgz}
