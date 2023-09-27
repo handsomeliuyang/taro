@@ -1000,6 +1000,9 @@ importers:
       '@tarojs/transformer-wx':
         specifier: workspace:*
         version: link:../taro-transformer-wx
+      lodash:
+        specifier: ^4.17.21
+        version: registry.npmjs.org/lodash@4.17.21
       postcss:
         specifier: ^8.4.18
         version: registry.npmjs.org/postcss@8.4.23
