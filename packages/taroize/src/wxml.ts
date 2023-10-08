@@ -254,7 +254,7 @@ export const createWxmlVistor = (
             }
           } catch (error) {
             // eslint-disable-next-line no-console
-            console.log(`style属性解析失败,errorMsg: ${error}`)
+            console.log(`style属性${styleValue}解析失败,errorMsg: ${error}`)
           }
         } else {
           path.remove() // 如果 style="{{}}" 存在空值，删除该属性
@@ -273,7 +273,7 @@ export const createWxmlVistor = (
             )
             path.node.value = t.jsxExpressionContainer(objectLiteral)
           } catch (error) {
-            printLog(processTypeEnum.ERROR, `style属性解析失败:${error}`)
+            printLog(processTypeEnum.ERROR, `style属性${styleValue}解析失败:${error}`)
           }
         } else {
           path.remove() // 如果 style="''" 存在空字符串，删除该属性
@@ -1052,7 +1052,12 @@ function parseAttribute (attr: Attribute) {
     }
 
     if (key === 'style' && value) {
-      return t.jSXAttribute(t.jSXIdentifier(key), t.stringLiteral(value))
+      const pattern = /\{\{.*?\}\}|[^{}]+/g
+      const matches = value.match(pattern)
+      // 针对style属性中非混用情况需拦截转变为字符串节点，混用情况采用‘+’连接的节点
+      if (matches && matches.length === 1) {
+        return t.jSXAttribute(t.jSXIdentifier(key), t.stringLiteral(value))
+      }
     }
 
     const { type, content } = parseContent(value)
