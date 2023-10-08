@@ -254,7 +254,7 @@ export const createWxmlVistor = (
             }
           } catch (error) {
             // eslint-disable-next-line no-console
-            console.log(`style属性解析失败,errorMsg: ${error}`)
+            console.log(`style属性${styleValue}解析失败,errorMsg: ${error}`)
           }
         } else {
           path.remove() // 如果 style="{{}}" 存在空值，删除该属性
@@ -273,7 +273,7 @@ export const createWxmlVistor = (
             )
             path.node.value = t.jsxExpressionContainer(objectLiteral)
           } catch (error) {
-            printLog(processTypeEnum.ERROR, `style属性解析失败:${error}`)
+            printLog(processTypeEnum.ERROR, `style属性${styleValue}解析失败:${error}`)
           }
         } else {
           path.remove() // 如果 style="''" 存在空字符串，删除该属性
@@ -1052,7 +1052,19 @@ function parseAttribute (attr: Attribute) {
     }
 
     if (key === 'style' && value) {
-      return t.jSXAttribute(t.jSXIdentifier(key), t.stringLiteral(value))
+      // 提取style属性中的字符串部分和{{}}部分
+      const pattern = /\{\{.*?\}\}|[^{}]+/g
+      const matches = value.match(pattern)
+      // 判断style中的每一个属性值是否是{{ xxx }}形式
+      const matchDoubleBraceReg = /^({{)(.*?)(}})$/
+      const styleAttrs = value.split(';')
+      const hasDoubleBraceAttr = styleAttrs.some(attr => {
+        return matchDoubleBraceReg.test(attr)
+      })
+      // 判断style属性中是否为xxx:xxx和{{ xxx }}混用情况，非混用情况拦截转为字符串节点，混用情况需采用“+”连接
+      if (!(matches?.length !== 1 && hasDoubleBraceAttr)) {
+        return t.jSXAttribute(t.jSXIdentifier(key), t.stringLiteral(value || ''))
+      }
     }
 
     const { type, content } = parseContent(value)
