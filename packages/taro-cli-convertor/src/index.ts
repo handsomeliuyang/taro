@@ -102,6 +102,14 @@ interface IConvertConfig {
   nodePath: string[] // 搜索三方库的目录
 }
 
+interface IReportMsg {
+  filePath: string 
+  type?: string    
+  message: string 
+  childReportMsg?: IReportMsg[]
+}
+
+
 function processStyleImports (content: string, processFn: (a: string, b: string) => string) {
   // 获取css中的引用样式文件路径集合
   const imports: string[] = getWxssImports(content)
@@ -149,6 +157,7 @@ export default class Convertor {
   miniprogramRoot: string
   convertConfig: IConvertConfig
   external: string[]
+  reportErroMsg: IReportMsg[]
 
   constructor (root, isTsProject) {
     this.root = root
@@ -170,6 +179,7 @@ export default class Convertor {
     this.hadBeenCopyedFiles = new Set<string>()
     this.hadBeenBuiltComponents = new Set<string>()
     this.hadBeenBuiltImports = new Set<string>()
+    this.reportErroMsg = []
     this.init()
   }
 
@@ -1223,6 +1233,40 @@ ${code}
     })
   }
 
+  /**
+   * copyFileTo： 将报告模版文件复制到转换后 taroConvert 目录中
+   * 
+   * @param { string } sourceFilePath 源文件路径
+   * @param { string } targeFileDir 转换后文件所在目录
+   * @param { string } targeFileName 转换后文件名
+   * @param { IReportMsg[] } reportErroMsg 报错信息
+   */
+  copyFileTo (sourceFilePath, targeFileDir, targeFileName, reportErroMsg: IReportMsg[] = []){
+    try {
+      if (!fs.existsSync(targeFileDir)) {
+        fs.mkdirSync(targeFileDir)
+      }
+      let data = fs.readFileSync(sourceFilePath, 'utf-8')
+      if (reportErroMsg) {
+        data = data.replace('__errorMsgReport__', JSON.stringify(reportErroMsg))
+      }
+      fs.writeFileSync(path.join(targeFileDir, targeFileName), data)
+
+      printLog(processTypeEnum.GENERATE, '报告文件', this.generateShowPath(path.join(targeFileDir, targeFileName)))
+    } catch (error) {
+      console.log(`文件${sourceFilePath}写入失败，errorMsg：${error}`)
+    }
+  }
+
+  generateReport (){
+    const reportDir = path.join(this.convertRoot, 'report')
+    const reportBundleFilePath = path.resolve(__dirname, '../', 'report/bundle.js')
+    const reportIndexFilePath = path.resolve(__dirname, '../', 'report/index.html')
+
+    this.copyFileTo(reportBundleFilePath, reportDir, 'bundle.js', this.reportErroMsg)
+    this.copyFileTo(reportIndexFilePath, reportDir, 'index.html')
+  }
+
   showLog () {
     console.log()
     console.log(
@@ -1230,6 +1274,7 @@ ${code}
         'taroConvert'
       )} 目录下使用 npm 或者 yarn 安装项目依赖后再运行！`
     )
+    console.log(`转换报告已生成，请进入到 ${path.join(this.convertRoot, 'report')} 目录中查看报告`)
   }
 
   run () {
@@ -1237,5 +1282,6 @@ ${code}
     this.generateEntry()
     this.traversePages()
     this.generateConfigFiles()
+    this.generateReport()
   }
 }
