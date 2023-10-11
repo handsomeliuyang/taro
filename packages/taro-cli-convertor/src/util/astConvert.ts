@@ -1,6 +1,7 @@
 import generate from '@babel/generator'
 import { NodePath } from '@babel/traverse'
 import * as t from '@babel/types'
+import { camelCase, capitalize } from 'lodash'
 
 // 最低限度的转义： https://github.com/mathiasbynens/jsesc#minimal
 export function generateMinimalEscapeCode (ast: t.File) {
@@ -9,6 +10,11 @@ export function generateMinimalEscapeCode (ast: t.File) {
       minimal: true,
     },
   }).code
+}
+
+export function pascalName (s: string) {
+  const str = camelCase(s)
+  return capitalize(str[0]) + str.slice(1)
 }
 
 // 判断是否已经引入 @tarojs/taro

@@ -37,7 +37,13 @@ import {
   incrementId,
   transRelToAbsPath,
 } from './util'
-import { generateMinimalEscapeCode, hasTaroImport, isCommonjsImport, isCommonjsModule } from './util/astConvert'
+import {
+  generateMinimalEscapeCode,
+  hasTaroImport,
+  isCommonjsImport,
+  isCommonjsModule,
+  pascalName,
+} from './util/astConvert'
 
 import type { ParserOptions } from '@babel/parser'
 import type { AppConfig, TabBar } from '@tarojs/taro'
@@ -135,6 +141,29 @@ function processStyleImports (content: string, processFn: (a: string, b: string)
   }
 }
 
+function isNumeric (n) {
+  return !isNaN(parseFloat(n)) && isFinite(n)
+}
+
+const NumberWords = ['z', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k']
+
+export function buildTemplateName (name: string, pascal = true): string {
+  if (/wx/i.test(name)) {
+    return buildTemplateName('taro-' + name.slice(2, name.length))
+  }
+  const words = pascal ? pascalName(name + '-tmpl') : name + '-tmpl'
+  // return words
+  const str: string[] = []
+  for (const word of words) {
+    if (isNumeric(word)) {
+      str.push(NumberWords[word])
+    } else {
+      str.push(word)
+    }
+  }
+
+  return str.join('')
+}
 export default class Convertor {
   root: string
   convertRoot: string
@@ -397,6 +426,81 @@ export default class Convertor {
                       // 传递的方法插入到Tmpl标签属性中
                       attributes.push(t.jsxAttribute(name, value))
                     })
+                  }
+                } else if (componentName === 'Template') {
+                  // 处理没被成功转换的模板, 如果被转换了就不会还是Template
+                  const attrs = openingElement.get('attributes')
+                  const is = attrs.find(
+                    (attr) =>
+                      t.isJSXAttribute(attr) &&
+                      t.isJSXIdentifier(attr.get('name')) &&
+                      t.isJSXAttribute(attr.node) &&
+                      attr.node.name.name === 'is'
+                  )
+                  // 处理<template is=字符串+变量 拼接的情况(组件的动态名称)
+                  if (is && t.isJSXAttribute(is.node)) {
+                    const value = is.node.value
+                    if (value && t.isJSXExpressionContainer(value)) {
+                      if (t.isBinaryExpression(value.expression) && value.expression.operator === '+') {
+                        // 加上map, template原名和新名字的映射
+                        const componentMapList: any[] = []
+                        for (const order in imports) {
+                          for (const key in imports[order]) {
+                            if (key === 'tmplname') {
+                              const tmplName = imports[order][key]
+                              // imports去重可能会把map里的去掉, 所以要加回去
+                              const tmplLastName = buildTemplateName(tmplName)
+                              if (!scriptComponents.includes(tmplLastName)) {
+                                scriptComponents.push(tmplLastName)
+                              }
+                              componentMapList.push(
+                                t.objectProperty(t.stringLiteral('' + tmplName), t.identifier(tmplLastName))
+                              )
+                            }
+                          }
+                        }
+                        const withWeappPath = astPath.findParent((p) => p.isClassDeclaration())
+                        if (withWeappPath) {
+                          const MapVariableDeclaration = t.variableDeclaration('const', [
+                            t.variableDeclarator(t.identifier('ComponentMap'), t.objectExpression(componentMapList)),
+                          ])
+                          withWeappPath.insertBefore(MapVariableDeclaration)
+                        }
+
+                        // 加上用map给新标签赋值
+                        const returnPath = astPath.findParent((p) => p.isReturnStatement())
+                        if (returnPath) {
+                          const ComponentNameVariableDeclaration = t.variableDeclaration('let', [
+                            t.variableDeclarator(
+                              t.identifier('ComponentName'),
+                              t.memberExpression(t.identifier('ComponentMap'), value.expression, true)
+                            ),
+                          ])
+                          returnPath.insertBefore(ComponentNameVariableDeclaration)
+                        }
+
+                        // 标签非Template的情况下不会加spread, 删除spread属性; 更改开闭合标签为ComponentName
+                        const attributes: t.JSXAttribute[] = []
+                        const data = attrs.find(
+                          (attr) =>
+                            t.isJSXAttribute(attr) &&
+                            t.isJSXIdentifier(attr.get('name')) &&
+                            t.isJSXAttribute(attr.node) &&
+                            attr.node.name.name === 'data'
+                        )
+                        if (data && t.isJSXAttribute(data.node)) {
+                          attributes.push(data.node)
+                        }
+                        astPath.replaceWith(
+                          t.jSXElement(
+                            t.jSXOpeningElement(t.jSXIdentifier('ComponentName'), attributes),
+                            t.jSXClosingElement(t.jSXIdentifier('ComponentName')),
+                            [],
+                            true
+                          )
+                        )
+                      }
+                    }
                   }
                 }
               }
