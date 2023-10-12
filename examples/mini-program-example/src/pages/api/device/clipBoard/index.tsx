@@ -24,11 +24,6 @@ export default class Index extends React.Component {
             ...data,
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-              Taro.showToast({
-                title: '内容已复制',
-                icon: 'none',
-                duration: 2000
-              })
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
