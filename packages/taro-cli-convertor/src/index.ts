@@ -209,30 +209,6 @@ export default class Convertor {
 
   wxsIncrementId = incrementId()
 
-  // 创建 cacheOptions 文件
-  generateCacheOptionFile (): void {
-    const cacheOptionsTemplate = `
-  export const cacheOptions = {
-    cacheOptions: {},
-    setOptionsToCache: function (options) {
-      if (Object.keys(options).length !== 0) {
-        this.cacheOptions = options;
-      }
-    },
-    getOptionsFromCache: function () {
-      return this.cacheOptions;
-    }
-  }      
-   `
-    const utilsPath = path.join(this.root, 'taroConvert/src/utils/')
-    const cacheOptionsPath = path.join(utilsPath, '_cacheOptions.js')
-
-    if (!fs.existsSync(cacheOptionsPath)) {
-      fs.mkdirSync(utilsPath, { recursive: true })
-      fs.writeFileSync(cacheOptionsPath, cacheOptionsTemplate)
-    }
-  }
-
   parseAst ({ ast, sourceFilePath, outputFilePath, importStylePath, depComponents, imports = [] }: IParseAstOptions): {
     ast: t.File
     scriptFiles: Set<string>
@@ -349,15 +325,12 @@ export default class Convertor {
                   astPath.replaceWith(cacheOptionsAstNode)
 
                   // 创建导入 cacheOptions 对象的 ast 节点
-                  const currentFilePath = sourceFilePath
-                  const cacheOptionsPath = path.resolve(self.root, 'utils', '_cacheOptions.js')
-                  const importOptionsUrl = promoteRelativePath(path.relative(currentFilePath, cacheOptionsPath))
                   const requireCacheOptionsAst = t.variableDeclaration('const', [
                     t.variableDeclarator(
                       t.objectPattern([
                         t.objectProperty(t.identifier('cacheOptions'), t.identifier('cacheOptions'), false, true),
                       ]),
-                      t.callExpression(t.identifier('require'), [t.stringLiteral(importOptionsUrl)])
+                      t.callExpression(t.identifier('require'), [t.stringLiteral('@tarojs/with-weapp')])
                     ),
                   ])
 
@@ -366,8 +339,6 @@ export default class Convertor {
                     ast.program.body.unshift(requireCacheOptionsAst)
                     hasCacheOptionsRequired = true
                   }
-
-                  self.generateCacheOptionFile()
                 }
               }
             },
