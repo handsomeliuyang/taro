@@ -59,14 +59,19 @@ describe('wxml.ts测试', () => {
     expect(wxses).toMatchSnapshot()
     expect(imports).toMatchSnapshot()
   })
+
+  test('wxs没有src ，标签内部没有代码',() => {
+
+  })
 })
 
 describe('wx: 测试',() => {
-  test('wx:for',() => {
-    option.wxml = `<view wx:for="{{number}}">{{item}}:{{index}}</view>
-    <view wx:for="{{string}}">{{item}}:{{index}}</view>
-    <view wx:for="{{date}}">{{item}}:{{index}}</view>
-    <view wx:for="{{regExp}}">{{item}}:{{index}}</view>`
+  test('wx:for遍历数字、字符串、对象，转换后是否替换为convertToArray',() => {
+    option.wxml = `
+      <view wx:for="{{number}}">数字：{{item}}:{{index}}</view>
+      <view wx:for="{{string}}">字符串：{{item}}:{{index}}</view>
+      <view wx:for="{{object}}">对象：{{item}}:{{index}}</view>
+    `
     option.path = 'wxml_wx:for'
     const { wxml } = parseWXML(option.path, option.wxml)
     expect(wxml).toMatchSnapshot()
