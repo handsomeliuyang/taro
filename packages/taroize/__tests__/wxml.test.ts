@@ -61,6 +61,18 @@ describe('wxml.ts测试', () => {
   })
 })
 
+describe('wx: 测试',() => {
+  test('wx:for',() => {
+    option.wxml = `<view wx:for="{{number}}">{{item}}:{{index}}</view>
+    <view wx:for="{{string}}">{{item}}:{{index}}</view>
+    <view wx:for="{{date}}">{{item}}:{{index}}</view>
+    <view wx:for="{{regExp}}">{{item}}:{{index}}</view>`
+    option.path = 'wxml_wx:for'
+    const { wxml } = parseWXML(option.path, option.wxml)
+    expect(wxml).toMatchSnapshot()
+  })
+})
+
 describe('parseContent', () => {
   test('节点key的值解析', () => {
     const contentInput = `{{list}}`
