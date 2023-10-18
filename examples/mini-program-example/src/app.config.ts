@@ -41,6 +41,7 @@ export default defineAppConfig({
     'pages/component/root-portal/root-portal',
     'pages/component/editor/editor',
     'pages/component/share-element/share-element',
+    'pages/component/live-player/live-player',
     'pages/api/index/index',
     'pages/api/advertising/index',
     'pages/api/ai/inference/index',
