@@ -24,7 +24,6 @@
   "collection:main": "dist/collection/index.js",
   "scripts": {
     "prepare": "run-p generate:*",
-    "lint": "eslint src --ext .js --ext .ts --ext .tsx",
     "prebuild": "run-p generate:*",
     "build": "cross-env NODE_ENV=production run-s build:components build:library",
     "build:components": "stencil build",
@@ -55,6 +54,7 @@
     "@tarojs/router": "workspace:*",
     "@tarojs/taro": "workspace:*",
     "classnames": "^2.2.5",
+    "flv.js": "^1.6.2",
     "hls.js": "^1.1.5",
     "intersection-observer": "^0.7.0",
     "resolve-pathname": "^3.0.0",

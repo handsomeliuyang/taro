@@ -32,7 +32,6 @@ export default class Index extends React.Component {
           LivePlayerContext.mute({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -41,8 +40,6 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           })
-
-          TestConsole.consoleNormal('mute ')
         },
       },
       {
@@ -52,7 +49,6 @@ export default class Index extends React.Component {
           LivePlayerContext.pause({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -61,7 +57,6 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           })
-          TestConsole.consoleNormal('pause')
         },
       },
       {
@@ -71,7 +66,6 @@ export default class Index extends React.Component {
           LivePlayerContext.stop({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -80,7 +74,6 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           })
-          TestConsole.consoleNormal('stop')
         },
       },
       {
@@ -90,7 +83,6 @@ export default class Index extends React.Component {
           LivePlayerContext.play({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -99,7 +91,6 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           })
-          TestConsole.consoleNormal('play')
         },
       },
       {
@@ -113,7 +104,6 @@ export default class Index extends React.Component {
             ...data,
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -126,7 +116,6 @@ export default class Index extends React.Component {
             LivePlayerContext.exitFullScreen()
             TestConsole.consoleNormal('exitFullScreen')
           }, 8000)
-
           TestConsole.consoleNormal('requestFullScreen')
         },
       },
@@ -137,7 +126,6 @@ export default class Index extends React.Component {
           LivePlayerContext.resume({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -146,8 +134,6 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           })
-
-          TestConsole.consoleNormal('resume')
         },
       },
       {
@@ -170,7 +156,6 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           })
-          TestConsole.consoleNormal('snapshot')
         },
       },
       {
@@ -180,7 +165,6 @@ export default class Index extends React.Component {
           LivePlayerContext.requestPictureInPicture({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -189,7 +173,6 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           })
-          TestConsole.consoleNormal('requestPictureInPicture')
         },
       },
       {
@@ -199,7 +182,6 @@ export default class Index extends React.Component {
           LivePlayerContext.exitPictureInPicture({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -208,10 +190,8 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           })
-          TestConsole.consoleNormal('exitPictureInPicture')
         },
       },
-
       {
         id: 'LivePusherContext',
         func: null,
