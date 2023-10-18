@@ -6,10 +6,7 @@ import Header from '../../../components/head/head'
 import ComponentState from '../../../components/component_state/component_state'
 
 export default class PageView extends React.Component {
-  
-  
-  render() {
-    
+   render() {
     return (
       <View className='components-page'>
         <View className='components-page__header'>
