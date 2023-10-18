@@ -389,10 +389,6 @@ export class LivePlayer implements ComponentInterface {
     }
   }
   /** 停止视频 */
-  // @Method()
-  // async stop () {
-  //   this._stop()
-  // }
 
   _stop = () => {
     try {
@@ -410,7 +406,6 @@ export class LivePlayer implements ComponentInterface {
     }
   }
   /** 恢复视频 */
-  // @Method()
   _resume = () => {
     try {
       this.createPlayers()
