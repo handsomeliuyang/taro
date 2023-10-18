@@ -6,25 +6,8 @@ import Header from '../../../components/head/head'
 import ComponentState from '../../../components/component_state/component_state'
 
 export default class PageView extends React.Component {
-  demo(){
-    Taro.navigateTo({
-      url: '/pages/component/image/image',
-      events: {
-        data: 'test',
-      },
-      success: (res) => {
-        // TestConsole.consoleSuccess.call(this, res, apiIndex)
-      },
-      fail: (res) => {
-        // TestConsole.consoleFail.call(this, res, apiIndex)
-      },
-      complete: (res) => {
-        // TestConsole.consoleComplete.call(this, res, apiIndex)
-      },
-    }).then((res) => {
-      // TestConsole.consoleReturn.call(this, res, apiIndex)
-    })
-  }
+  
+  
   render() {
     
     return (
@@ -53,8 +36,6 @@ export default class PageView extends React.Component {
                 pictureInPictureMode={["pop","push"]}
               />
             </View>
-            
-          {/* <Button onClick={this.demo}>跳转</Button> */}
           </View>
         </View>
       </View>
