@@ -8,7 +8,8 @@ export function generateMinimalEscapeCode (ast: t.File) {
     jsescOption: {
       minimal: true,
     },
-  }).code
+    sourceMaps: true,
+  })
 }
 
 // 判断是否已经引入 @tarojs/taro
@@ -58,4 +59,23 @@ export function isCommonjsModule (bodyNode: NodePath<t.Node>[]) {
     }
     return false
   })
+}
+
+/**
+ * 判断节点是否为commonjs的导入
+ *
+ * @param {NodePath<t.Node>} bodyNode
+ * @returns {boolean}
+ */
+export function isCommonjsImport (bodyNode: NodePath<t.Node>) {
+  if (bodyNode.isVariableDeclaration() && bodyNode.node.declarations.length === 1) {
+    const declaration: t.VariableDeclarator = bodyNode.node.declarations[0]
+    return (
+      declaration.init != null &&
+      declaration.init.type === 'CallExpression' &&
+      declaration.init.callee.type === 'Identifier' &&
+      declaration.init.callee.name === 'require'
+    )
+  }
+  return false
 }

@@ -1,8 +1,37 @@
 import Taro from '@tarojs/api'
+import { addStyle } from '@tarojs/router/dist/style'
 import { setTitle } from '@tarojs/router/dist/utils/navigate'
 
 import { getParameterError, shouldBeObject } from '../../../utils'
 import { MethodHandler } from '../../../utils/handler'
+
+/**
+ * 导航条与Web层叠布局，导航条可见情况下Web页面顶部空出一定高度的留白
+ */
+function loadNavigationSytle () {
+  if (typeof window === 'undefined') {
+    return
+  }
+  // @ts-ignore
+  const naviHeight = window.navigationHeight ? window.navigationHeight : 0
+  // 设置transform属性使得页面内position:fixed的元素相对于app元素定位而不是视口(viewport)
+  const css = `
+.taro_router.taro_navigation {
+  transform: translateZ(0);
+  top: ${naviHeight}px;
+}
+
+.taro-tabbar__container .taro_navigation .taro_page {
+  max-height: calc(100vh - ${naviHeight}px);
+}
+
+.taro-tabbar__container .taro_navigation .taro_page.taro_tabbar_page {
+  max-height: calc(100vh - 50px - ${naviHeight}px);
+}`
+  addStyle(css)
+}
+
+loadNavigationSytle()
 
 /**
  * 显示页面导航条加载图标

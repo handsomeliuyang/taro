@@ -14,18 +14,28 @@ export default class Index extends React.Component {
     list: [
       {
         id: 'setStorageSync',
-        func: (apiIndex) => {
+        inputData: {
+          key: 'setStorageSyncKey',
+          value: 'setStorageSyncValue',
+        },
+        func: (apiIndex, data) => {
           TestConsole.consoleTest('setStorageSync')
-          Taro.setStorageSync('setStorageSyncKey', 'setStorageSyncValue')
+          const { key, value } = data
+          Taro.setStorageSync(key, value)
         },
       },
       {
         id: 'setStorage',
-        func: (apiIndex) => {
+        inputData: {
+          key: 'setStorageKey',
+          value: 'setStorageValue',
+        },
+        func: (apiIndex, data) => {
           TestConsole.consoleTest('setStorage')
+          const { key, value } = data
           Taro.setStorage({
-            data: 'setStorageValue',
-            key: 'setStorageKey',
+            key: key,
+            data: value,
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
             },
@@ -36,7 +46,7 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           }).then((res) => {
-            TestConsole.consoleReturn.call(this, res, apiIndex)
+            TestConsole.consoleResult.call(this, res, apiIndex)
           })
         },
       },
@@ -46,18 +56,25 @@ export default class Index extends React.Component {
       },
       {
         id: 'removeStorageSync',
-        func: (apiIndex) => {
+        inputData: {
+          key: 'setStorageKey',
+        },
+        func: (apiIndex, data) => {
           TestConsole.consoleTest('removeStorageSync')
-          const res = Taro.removeStorageSync('setStorageSyncKey')
-          TestConsole.consoleSuccess.call(this, res, apiIndex)
+          const { key } = data
+          Taro.removeStorageSync(key)
         },
       },
       {
         id: 'removeStorage',
-        func: (apiIndex) => {
+        inputData: {
+          key: 'setStorageKey',
+        },
+        func: (apiIndex, data) => {
           TestConsole.consoleTest('removeStorage')
+          const { key } = data
           Taro.removeStorage({
-            key: 'setStorageKey',
+            key,
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
             },
@@ -68,34 +85,52 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           }).then((res) => {
-            TestConsole.consoleReturn.call(this, res, apiIndex)
+            TestConsole.consoleResult.call(this, res, apiIndex)
           })
         },
       },
       {
         id: 'getStorageSync',
-        func: (apiIndex) => {
+        inputData: {
+          key: 'setStorageKey',
+        },
+        func: (apiIndex, data) => {
           TestConsole.consoleTest('getStorageSync')
-          try {
-            var value = Taro.getStorageSync('setStorageSyncKey')
-            if (value) {
-              TestConsole.consoleSuccess.call(this, value, apiIndex)
-            }
-          } catch (err) {
-            TestConsole.consoleFail.call(this, err, apiIndex)
-          }
+          const { key } = data
+          let value = Taro.getStorageSync(key)
+          TestConsole.consoleResult.call(this, value, apiIndex)
+        },
+      },
+      {
+        id: 'getStorage',
+        inputData: {
+          key: 'setStorageKey',
+        },
+        func: (apiIndex, data) => {
+          TestConsole.consoleTest('getStorage')
+          const { key } = data
+          Taro.getStorage({
+            key,
+            success: (res) => {
+              TestConsole.consoleSuccess.call(this, res, apiIndex)
+            },
+            fail: (res) => {
+              TestConsole.consoleFail.call(this, res, apiIndex)
+            },
+            complete: (res) => {
+              TestConsole.consoleComplete.call(this, res, apiIndex)
+            },
+          }).then((res) => {
+            TestConsole.consoleResult.call(this, res, apiIndex)
+          })
         },
       },
       {
         id: 'getStorageInfoSync',
         func: (apiIndex) => {
           TestConsole.consoleTest('getStorageInfoSync')
-          try {
-            const res = Taro.getStorageInfoSync()
-            TestConsole.consoleSuccess.call(this, res, apiIndex)
-          } catch (err) {
-            TestConsole.consoleFail.call(this, err, apiIndex)
-          }
+          const res = Taro.getStorageInfoSync()
+          TestConsole.consoleResult.call(this, res, apiIndex)
         },
       },
       {
@@ -113,27 +148,7 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           }).then((res) => {
-            TestConsole.consoleReturn.call(this, res, apiIndex)
-          })
-        },
-      },
-      {
-        id: 'getStorage',
-        func: (apiIndex) => {
-          TestConsole.consoleTest('getStorage')
-          Taro.getStorage({
-            key: 'setStorageKey',
-            success: (res) => {
-              TestConsole.consoleSuccess.call(this, res, apiIndex)
-            },
-            fail: (res) => {
-              TestConsole.consoleFail.call(this, res, apiIndex)
-            },
-            complete: (res) => {
-              TestConsole.consoleComplete.call(this, res, apiIndex)
-            },
-          }).then((res) => {
-            TestConsole.consoleReturn.call(this, res, apiIndex)
+            TestConsole.consoleResult.call(this, res, apiIndex)
           })
         },
       },
@@ -145,12 +160,8 @@ export default class Index extends React.Component {
         id: 'clearStorageSync',
         func: (apiIndex) => {
           TestConsole.consoleTest('clearStorageSync')
-          try {
-            const res = Taro.clearStorageSync()
-            TestConsole.consoleSuccess.call(this, res, apiIndex)
-          } catch (err) {
-            TestConsole.consoleFail.call(this, err, apiIndex)
-          }
+          let res = Taro.clearStorageSync()
+          TestConsole.consoleResult.call(this, res, apiIndex)
         },
       },
       {
@@ -168,7 +179,7 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           }).then((res) => {
-            TestConsole.consoleReturn.call(this, res, apiIndex)
+            TestConsole.consoleResult.call(this, res, apiIndex)
           })
         },
       },

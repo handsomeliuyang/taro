@@ -31,7 +31,7 @@ export function buildTemplateName (name: string, pascal = true): string {
   return str.join('')
 }
 
-export function parseTemplate (path: NodePath<t.JSXElement>, dirPath: string) {
+export function parseTemplate (path: NodePath<t.JSXElement>, dirPath: string, refIdsBack?: Set<string>) {
   if (!path.container) {
     return
   }
@@ -59,7 +59,7 @@ export function parseTemplate (path: NodePath<t.JSXElement>, dirPath: string) {
       attr.node.name.name === 'name'
   )
 
-  const refIds = new Set<string>()
+  let refIds = new Set<string>()
   const loopIds = new Set<string>()
   const imports: any[] = []
   if (name && t.isJSXAttribute(name.node)) {
@@ -67,9 +67,15 @@ export function parseTemplate (path: NodePath<t.JSXElement>, dirPath: string) {
     if (value === null || !t.isStringLiteral(value)) {
       throw new Error('template 的 `name` 属性只能是字符串')
     }
+    // 收集template原始name, 作为map的key
+    const templateName = value.value
     const className = buildTemplateName(value.value)
 
     path.traverse(createWxmlVistor(loopIds, refIds, dirPath, [], imports))
+    if (refIdsBack) {
+      // 补充没有引入但是要传递的属性
+      refIds = new Set([...refIds, ...refIdsBack])
+    }
     const firstId = Array.from(refIds)[0]
     refIds.forEach((id) => {
       if (loopIds.has(id) && id !== firstId) {
@@ -102,6 +108,7 @@ export function parseTemplate (path: NodePath<t.JSXElement>, dirPath: string) {
     return {
       name: className,
       ast: classDecl,
+      tmplName: templateName,
     }
   } else if (is && t.isJSXAttribute(is.node)) {
     const value = is.node.value

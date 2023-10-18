@@ -34,10 +34,10 @@ export default class Index extends React.Component {
             },
           })
             .then((res) => {
-              TestConsole.consoleReturn.call(this, res, apiIndex)
+              TestConsole.consoleResult.call(this, res, apiIndex)
             })
             .catch((err) => {
-              TestConsole.consoleReturn.call(this, err, apiIndex)
+              TestConsole.consoleResult.call(this, err, apiIndex)
             })
         },
       },
@@ -61,10 +61,10 @@ export default class Index extends React.Component {
             },
           })
             .then((res) => {
-              TestConsole.consoleReturn.call(this, res, apiIndex)
+              TestConsole.consoleResult.call(this, res, apiIndex)
             })
             .catch((err) => {
-              TestConsole.consoleReturn.call(this, err, apiIndex)
+              TestConsole.consoleResult.call(this, err, apiIndex)
             })
         },
       },
@@ -98,10 +98,10 @@ export default class Index extends React.Component {
             },
           })
             .then((res) => {
-              TestConsole.consoleReturn.call(this, res, apiIndex)
+              TestConsole.consoleResult.call(this, res, apiIndex)
             })
             .catch((err) => {
-              TestConsole.consoleReturn.call(this, err, apiIndex)
+              TestConsole.consoleResult.call(this, err, apiIndex)
             })
         },
       },
@@ -109,7 +109,7 @@ export default class Index extends React.Component {
   }
 
   userCaptureScreen = (res) => {
-    TestConsole.consoleOnCallback(res, 'onUserCaptureScreen')
+    TestConsole.consoleOnCallback.call(this, res, 'onUserCaptureScreen', 2)
   }
 
   render() {
