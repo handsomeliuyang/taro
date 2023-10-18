@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro'
-// import { MethodHandler } from '../../../utils/handler'
+
 export class LivePlayerContext implements Taro.LivePlayerContext {
   LivePlayer: any
   constructor (LivePlayer) {
