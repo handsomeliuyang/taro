@@ -12,7 +12,7 @@ import {
 } from '@stencil/core'
 import flvjs from 'flv.js'
 
-import { scene,screenFn } from './utils'
+import { scene, screenFn } from './utils'
 
 @Component({
   tag: 'taro-live-player-core',
@@ -25,9 +25,61 @@ export class LivePlayer implements ComponentInterface {
   private earID: string
   private livePlayerRef: HTMLVideoElement
   private videoElement: any
-  // private dlnacasts: any;
-  // private pictureInPictureModePop: boolean = false;
-  // private pictureInPictureModePush: boolean = false;
+  private onStateChangeCodeMssage = {
+    // 视频源加载成功
+    Ready: {
+      code: 200,
+      message: 'Ready to play',
+    },
+    // 播放器创建成功
+    Created: {
+      code: 210,
+      message: 'Created successfully',
+    },
+    // 视频已开始播放
+    Rendering: {
+      code: 300,
+      message: 'Rendering video',
+    },
+    // 视频正在播放
+    Playing: {
+      code: 310,
+      message: 'Playing video',
+    },
+    // 视频暂停
+    Paused: {
+      code: 320,
+      message: 'Paused',
+    },
+    // 播放出错
+    Error: {
+      code: 400,
+      message: 'Error occurred',
+    },
+    // 播放结束
+    Ended: {
+      code: 500,
+      message: 'Playback ended',
+    },
+  }
+ onErrorCodeMssage = {
+    Disconnection: {
+      code: -2305,
+      message: '视频下载过程中网络断开或连接超时',
+    },
+    Notget:{
+      code: -2301,
+      message: '获取不到视频流，请稍后再试',
+    },
+    Decode:{
+      code: -2302,
+      message: '解码错误，请稍后再试',
+    },
+    interior:{
+      code: -2308,
+      message: '播放器内部错误，请稍后再试',
+    }
+  }
 
   @Element() el: Element
 
@@ -83,59 +135,49 @@ export class LivePlayer implements ComponentInterface {
   @State() fullScreenTimestamp = new Date().getTime()
   // 全屏状态
   @State() isFullScreen = false
-  
+
   @Event({
     eventName: 'onStateChange',
   })
-    onStateChange: EventEmitter
+  onStateChange: EventEmitter
 
   @Event({
     eventName: 'fullscreenchange',
   })
-    onFullScreenChange: EventEmitter
+  onFullScreenChange: EventEmitter
 
   @Event({
     eventName: 'onAudioVolumeNotify',
   })
-    onAudioVolumeNotify: EventEmitter
+  onAudioVolumeNotify: EventEmitter
 
   @Event({
     eventName: 'onNetStatus',
   })
-    onNetStatus: EventEmitter
+  onNetStatus: EventEmitter
 
   @Event({
     eventName: 'onError',
   })
-    onError: EventEmitter
+  onError: EventEmitter
 
   @Event({
     eventName: 'onEnterPictureInPicture',
   })
-    onEnterPictureInPicture: EventEmitter
+  onEnterPictureInPicture: EventEmitter
 
   @Event({
     eventName: 'onLeavePictureInPicture',
   })
-    onLeavePictureInPicture: EventEmitter
+  onLeavePictureInPicture: EventEmitter
 
   async componentDidLoad () {
-   
     try {
-      navigator.mediaDevices
-        .getUserMedia({ audio: true })
-        .then(function () {
-          // 用户已授权
-        })
-        .catch(function (err) {
-          console.error('请求设备权限失败：', err)
-        })
       const deviceInfos = await navigator.mediaDevices.enumerateDevices()
       this.findAudioDevices(deviceInfos)
     } catch (error) {
       console.error('获取设备列表失败: ', error)
     }
-
     if (document.addEventListener) {
       document.addEventListener(screenFn.fullscreenchange, this.handleFullScreenChange)
     }
@@ -145,7 +187,7 @@ export class LivePlayer implements ComponentInterface {
     }
     if (flvjs.isSupported()) {
       let modeType: number = 1024 * 1024
-      if (this.mode == 'live') {
+      if (this.mode === 'live') {
         modeType = 1024 * 1024
       } else {
         modeType = 1024 * 256
@@ -157,13 +199,9 @@ export class LivePlayer implements ComponentInterface {
       this.livePlayerRef.addEventListener('volumechange', () => {
         this.onAudioVolumeNotify.emit({})
       })
-
       // 监听播放器播放结束
       this.livePlayerRef.addEventListener('ended', () => {
-        this.onStateChange.emit({
-          code: 500,
-          message: 'Playback ended',
-        })
+        this.onStateChange.emit(this.onStateChangeCodeMssage.Ended)
       })
       // 静音属性
       if (this.muted && this.videoElement) {
@@ -171,18 +209,18 @@ export class LivePlayer implements ComponentInterface {
         this.videoElement.volume = 0
       }
       // 画面方向
-      if (this.orientation == 'vertical' && this.videoElement) {
-        this.videoElement.style.transform = "rotate(90deg)"
+      if (this.orientation === 'vertical' && this.videoElement) {
+        this.videoElement.style.transform = 'rotate(90deg)'
         this.videoElement.style.height = 'hidden'
-      } else if (this.orientation == 'horizontal' && this.videoElement) {
+      } else if (this.orientation === 'horizontal' && this.videoElement) {
         this.videoElement.style.width = '100%'
-      } else if (this.orientation == 'default' && this.videoElement) {
+      } else if (this.orientation === 'default' && this.videoElement) {
         this.videoElement.style.width = '100%'
       }
       // 画面填充方式
-      if (this.objectFit == 'contain' && this.videoElement) {
+      if (this.objectFit === 'contain' && this.videoElement) {
         this.videoElement.style.objectFit = 'contain'
-      } else if (this.objectFit == 'fillCrop' && this.videoElement) {
+      } else if (this.objectFit === 'fillCrop' && this.videoElement) {
         this.videoElement.style.objectFit = 'cover'
       }
       // 创建播放器
@@ -193,17 +231,16 @@ export class LivePlayer implements ComponentInterface {
       } else {
         this.switchToHeadphones()
       }
-      this.videoElement.addEventListener('fullscreenchange',  (event)=> {
+      this.videoElement.addEventListener('fullscreenchange', (event) => {
         event.stopPropagation()
-        let fullScreenTimestamp= new Date().getTime()
-        if(fullScreenTimestamp-this.fullScreenTimestamp<100){ 
-          return;
+        const fullScreenTimestamp = new Date().getTime()
+        if (fullScreenTimestamp - this.fullScreenTimestamp < 100) {
+          return
         }
         this.onFullScreenChange.emit({
           fullScreen: this.isFullScreen,
           direction: 0,
         })
-        
       })
     }
   }
@@ -221,6 +258,7 @@ export class LivePlayer implements ComponentInterface {
       }
     })
   }
+
   // 创建播放器
   createPlayers () {
     const config = {
@@ -233,73 +271,41 @@ export class LivePlayer implements ComponentInterface {
     this.player = flvjs.createPlayer(config)
     // 创建异常监听
     this.player.on(flvjs.ErrorDetails.NETWORK_EXCEPTION, function (type, message, data) {
-      this.onStateChange.emit({
-        code: 400,
-        message: 'Error occurred',
-      })
+      this.onStateChange.emit(this.onStateChangeCodeMssage.Error)
       if (type === flvjs.Events.ERROR && data === flvjs.ErrorDetails.NETWORK_EXCEPTION) {
         this.onNetStatus.emit({
           message: message,
           info: data,
           ts: new Date().getTime(),
         })
-        this.onError.emit({
-          detail: {
-            code: -2305,
-            message: '视频下载过程中网络断开或连接超时',
-          },
-        })
+        this.onError.emit(this.onErrorCodeMssage.Disconnection)
         // 处理网络异常的逻辑
       } else {
         // 处理其他错误的逻辑
       }
     })
     this.player.attachMediaElement(this.videoElement)
-    this.onStateChange.emit({ code: 210 })
+    this.onStateChange.emit(this.onStateChangeCodeMssage.Created)
     this.player.load()
-    this.onStateChange.emit({
-      code: 200,
-      message: 'Ready to play',
-    })
+    this.onStateChange.emit(this.onStateChangeCodeMssage.Ready)
     if (this.autoplay) {
-      this.onStateChange.emit({
-        code: 300,
-        message: 'Rendering video',
-      })
+      this.onStateChange.emit(this.onStateChangeCodeMssage.Rendering)
       this.player.play()
-      this.onStateChange.emit({
-        code: 310,
-        message: 'Playing video',
-      })
+      this.onStateChange.emit(this.onStateChangeCodeMssage.Playing)
     }
     // 创建错误监听
     this.player.on(flvjs.Events.ERROR, function (message) {
       const regVideo = /Unable to load manifest/i
       if (regVideo.test(message)) {
-        this.onError.emit({
-          detail: {
-            code: -2301,
-            message: '获取不到视频流，请稍后再试',
-          },
-        })
+        this.onError.emit(this.onErrorCodeMssage.Notget)
         return
       }
       const regDecode = /Unsupported codec in video frame/i
       if (regDecode.test(message)) {
-        this.onError.emit({
-          detail: {
-            code: -2302,
-            message: '解码错误，请稍后再试',
-          },
-        })
+        this.onError.emit(this.onErrorCodeMssage.Decode)
         return
       }
-      this.onError.emit({
-        detail: {
-          code: -2308,
-          message: '播放器内部错误，请稍后再试',
-        },
-      })
+      this.onError.emit(this.onErrorCodeMssage.interior)
     })
   }
 
@@ -365,10 +371,7 @@ export class LivePlayer implements ComponentInterface {
   _pause = () => {
     try {
       this.player.pause()
-      this.onStateChange.emit({
-        code: 320,
-        message: 'Paused',
-      })
+      this.onStateChange.emit(this.onStateChangeCodeMssage.Paused)
       return { errMsg: `ok`, message: 'success.' }
     } catch (e) {
       return { errMsg: `err`, message: e }
@@ -379,20 +382,13 @@ export class LivePlayer implements ComponentInterface {
   _play = () => {
     try {
       this.player.play()
-      this.onStateChange.emit({
-        code: 310,
-        message: 'Playing video',
-      })
+      this.onStateChange.emit(this.onStateChangeCodeMssage.Playing)
       return { errMsg: `ok`, message: 'success.' }
     } catch (e) {
       return { errMsg: `err`, message: e }
     }
   }
   /** 停止视频 */
-  // @Method()
-  // async stop () {
-  //   this._stop()
-  // }
 
   _stop = () => {
     try {
@@ -400,24 +396,18 @@ export class LivePlayer implements ComponentInterface {
       this.player.unload()
       this.player.detachMediaElement()
       this.player.destroy()
-      this.onStateChange.emit({
-        code: 500,
-        message: 'Playback ended',
-      })
+      this.onStateChange.emit(this.onStateChangeCodeMssage.Ended)
       return { errMsg: `ok`, message: 'success.' }
     } catch (e) {
       return { errMsg: `err`, message: e }
     }
   }
+
   /** 恢复视频 */
-  // @Method()
   _resume = () => {
     try {
       this.createPlayers()
-      this.onStateChange.emit({
-        code: 500,
-        message: 'Playback ended',
-      })
+      this.onStateChange.emit(this.onStateChangeCodeMssage.Ended)
       return { errMsg: `ok`, message: 'success.' }
     } catch (e) {
       return { errMsg: `err`, message: e }
@@ -428,7 +418,7 @@ export class LivePlayer implements ComponentInterface {
 
   toggleFullScreen = (isFullScreen = !this.isFullScreen) => {
     this.isFullScreen = isFullScreen
-    
+
     this.fullScreenTimestamp = new Date().getTime()
     this.onFullScreenChange.emit({
       fullScreen: this.isFullScreen,
@@ -452,6 +442,7 @@ export class LivePlayer implements ComponentInterface {
       }
     }
   }
+
   /** 截屏 */
   _snapshot (data) {
     return new Promise((resolve, reject) => {
@@ -460,12 +451,12 @@ export class LivePlayer implements ComponentInterface {
       let imgheight
 
       // 原图
-      if (data.quality == 'raw') {
+      if (data.quality === 'raw') {
         imgwidth = this.livePlayerRef.videoWidth
         imgheight = this.livePlayerRef.videoHeight
       }
       // 压缩图
-      if (data.quality == 'compressed') {
+      if (data.quality === 'compressed') {
         imgwidth = this.livePlayerRef.videoWidth * 0.5
         imgheight = this.livePlayerRef.videoHeight * 0.5
       }
@@ -490,6 +481,8 @@ export class LivePlayer implements ComponentInterface {
       }
     })
   }
+
+  // 转化成Bolb
   dataURLtoBlob (dataurl) {
     const arr = dataurl.split(',')
     const mime = arr[0].match(/:(.*?);/)[1]
@@ -501,6 +494,7 @@ export class LivePlayer implements ComponentInterface {
     }
     return new Blob([u8arr], { type: mime })
   }
+
   // 画中画
   async _enterPictureInPicture () {
     return new Promise((resolve, reject) => {
@@ -524,7 +518,7 @@ export class LivePlayer implements ComponentInterface {
       } else {
         // 浏览器不支持画中画或无法找到视频元素
         reject({ errMsg: `error`, message: '该设备不支持小窗' })
-        
+
       }
     })
   }
@@ -572,15 +566,7 @@ export class LivePlayer implements ComponentInterface {
   orientationchangeHandler () {
     this.handleOrientationChange()
   }
- 
-  @Listen('onhashchange', { target: 'window' })
-  handleonhashchange () {
-    console.log("URL的哈希值发生变化", window.location.hash);
-  }
-  @Listen('onpopstate', { target: 'window' })
-  handleonhashchanges () {
-    console.log("路由发生变化", window.location.hash);
-  }
+
   componentDidHide () {
     if (this.player) {
       if (this.autoPauseIfNavigate) {
