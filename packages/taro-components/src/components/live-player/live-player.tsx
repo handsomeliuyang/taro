@@ -12,7 +12,7 @@ import {
 } from '@stencil/core'
 import flvjs from 'flv.js'
 
-import { scene,screenFn } from './utils'
+import { scene, screenFn } from './utils'
 
 @Component({
   tag: 'taro-live-player-core',
@@ -83,7 +83,7 @@ export class LivePlayer implements ComponentInterface {
   @State() fullScreenTimestamp = new Date().getTime()
   // 全屏状态
   @State() isFullScreen = false
-  
+
   @Event({
     eventName: 'onStateChange',
   })
@@ -120,7 +120,7 @@ export class LivePlayer implements ComponentInterface {
     onLeavePictureInPicture: EventEmitter
 
   async componentDidLoad () {
-   
+
     try {
       navigator.mediaDevices
         .getUserMedia({ audio: true })
@@ -145,7 +145,7 @@ export class LivePlayer implements ComponentInterface {
     }
     if (flvjs.isSupported()) {
       let modeType: number = 1024 * 1024
-      if (this.mode == 'live') {
+      if (this.mode === 'live') {
         modeType = 1024 * 1024
       } else {
         modeType = 1024 * 256
@@ -171,18 +171,18 @@ export class LivePlayer implements ComponentInterface {
         this.videoElement.volume = 0
       }
       // 画面方向
-      if (this.orientation == 'vertical' && this.videoElement) {
-        this.videoElement.style.transform = "rotate(90deg)"
+      if (this.orientation === 'vertical' && this.videoElement) {
+        this.videoElement.style.transform = 'rotate(90deg)'
         this.videoElement.style.height = 'hidden'
-      } else if (this.orientation == 'horizontal' && this.videoElement) {
+      } else if (this.orientation === 'horizontal' && this.videoElement) {
         this.videoElement.style.width = '100%'
-      } else if (this.orientation == 'default' && this.videoElement) {
+      } else if (this.orientation === 'default' && this.videoElement) {
         this.videoElement.style.width = '100%'
       }
       // 画面填充方式
-      if (this.objectFit == 'contain' && this.videoElement) {
+      if (this.objectFit === 'contain' && this.videoElement) {
         this.videoElement.style.objectFit = 'contain'
-      } else if (this.objectFit == 'fillCrop' && this.videoElement) {
+      } else if (this.objectFit === 'fillCrop' && this.videoElement) {
         this.videoElement.style.objectFit = 'cover'
       }
       // 创建播放器
@@ -193,17 +193,17 @@ export class LivePlayer implements ComponentInterface {
       } else {
         this.switchToHeadphones()
       }
-      this.videoElement.addEventListener('fullscreenchange',  (event)=> {
+      this.videoElement.addEventListener('fullscreenchange', (event) => {
         event.stopPropagation()
-        let fullScreenTimestamp= new Date().getTime()
-        if(fullScreenTimestamp-this.fullScreenTimestamp<100){ 
-          return;
+        const fullScreenTimestamp = new Date().getTime()
+        if (fullScreenTimestamp - this.fullScreenTimestamp < 100) {
+          return
         }
         this.onFullScreenChange.emit({
           fullScreen: this.isFullScreen,
           direction: 0,
         })
-        
+
       })
     }
   }
@@ -221,6 +221,7 @@ export class LivePlayer implements ComponentInterface {
       }
     })
   }
+
   // 创建播放器
   createPlayers () {
     const config = {
@@ -405,6 +406,7 @@ export class LivePlayer implements ComponentInterface {
       return { errMsg: `err`, message: e }
     }
   }
+
   /** 恢复视频 */
   _resume = () => {
     try {
@@ -423,7 +425,7 @@ export class LivePlayer implements ComponentInterface {
 
   toggleFullScreen = (isFullScreen = !this.isFullScreen) => {
     this.isFullScreen = isFullScreen
-    
+
     this.fullScreenTimestamp = new Date().getTime()
     this.onFullScreenChange.emit({
       fullScreen: this.isFullScreen,
@@ -447,6 +449,7 @@ export class LivePlayer implements ComponentInterface {
       }
     }
   }
+
   /** 截屏 */
   _snapshot (data) {
     return new Promise((resolve, reject) => {
@@ -455,12 +458,12 @@ export class LivePlayer implements ComponentInterface {
       let imgheight
 
       // 原图
-      if (data.quality == 'raw') {
+      if (data.quality === 'raw') {
         imgwidth = this.livePlayerRef.videoWidth
         imgheight = this.livePlayerRef.videoHeight
       }
       // 压缩图
-      if (data.quality == 'compressed') {
+      if (data.quality === 'compressed') {
         imgwidth = this.livePlayerRef.videoWidth * 0.5
         imgheight = this.livePlayerRef.videoHeight * 0.5
       }
@@ -485,6 +488,8 @@ export class LivePlayer implements ComponentInterface {
       }
     })
   }
+
+  // 转化成Bolb
   dataURLtoBlob (dataurl) {
     const arr = dataurl.split(',')
     const mime = arr[0].match(/:(.*?);/)[1]
@@ -496,6 +501,7 @@ export class LivePlayer implements ComponentInterface {
     }
     return new Blob([u8arr], { type: mime })
   }
+
   // 画中画
   async _enterPictureInPicture () {
     return new Promise((resolve, reject) => {
@@ -519,7 +525,7 @@ export class LivePlayer implements ComponentInterface {
       } else {
         // 浏览器不支持画中画或无法找到视频元素
         reject({ errMsg: `error`, message: '该设备不支持小窗' })
-        
+
       }
     })
   }
@@ -567,15 +573,7 @@ export class LivePlayer implements ComponentInterface {
   orientationchangeHandler () {
     this.handleOrientationChange()
   }
- 
-  @Listen('onhashchange', { target: 'window' })
-  handleonhashchange () {
-    console.log("URL的哈希值发生变化", window.location.hash);
-  }
-  @Listen('onpopstate', { target: 'window' })
-  handleonhashchanges () {
-    console.log("路由发生变化", window.location.hash);
-  }
+
   componentDidHide () {
     if (this.player) {
       if (this.autoPauseIfNavigate) {

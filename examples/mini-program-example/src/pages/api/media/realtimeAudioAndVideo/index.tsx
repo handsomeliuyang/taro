@@ -32,7 +32,7 @@ export default class Index extends React.Component {
           LivePlayerContext.mute({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-              
+
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -41,7 +41,7 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           })
-          
+
           TestConsole.consoleNormal('mute ')
         },
       },
@@ -52,7 +52,7 @@ export default class Index extends React.Component {
           LivePlayerContext.pause({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-              
+
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -71,7 +71,7 @@ export default class Index extends React.Component {
           LivePlayerContext.stop({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-              
+
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -90,7 +90,7 @@ export default class Index extends React.Component {
           LivePlayerContext.play({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-              
+
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -113,7 +113,7 @@ export default class Index extends React.Component {
             ...data,
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-              
+
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -137,7 +137,7 @@ export default class Index extends React.Component {
           LivePlayerContext.resume({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-              
+
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -146,7 +146,7 @@ export default class Index extends React.Component {
               TestConsole.consoleComplete.call(this, res, apiIndex)
             },
           })
-          
+
           TestConsole.consoleNormal('resume')
         },
       },
@@ -154,9 +154,9 @@ export default class Index extends React.Component {
         id: 'LivePlayer_snapshot',
         inputData: {
           quality: "raw",
-          sourceType:'stream'
+          sourceType: 'stream'
         },
-        func: (apiIndex,data) => {
+        func: (apiIndex, data) => {
           TestConsole.consoleTest('LivePlayerContext_snapshot')
           LivePlayerContext.snapshot({
             ...data,
@@ -180,7 +180,7 @@ export default class Index extends React.Component {
           LivePlayerContext.requestPictureInPicture({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-              
+
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -199,7 +199,7 @@ export default class Index extends React.Component {
           LivePlayerContext.exitPictureInPicture({
             success: (res) => {
               TestConsole.consoleSuccess.call(this, res, apiIndex)
-              
+
             },
             fail: (res) => {
               TestConsole.consoleFail.call(this, res, apiIndex)
@@ -221,11 +221,13 @@ export default class Index extends React.Component {
   render () {
     const { list } = this.state
     return (
+      //@ts-ignore
       <View className='api-page'>
         <ButtonList buttonList={list} />
-        <LivePlayer id='LivePlayer' src='https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/flv/xgplayer-demo-480p.flv' isLive={true}
-          cors={true} soundMode='ear'
-          type='flv'  
+        <LivePlayer id='LivePlayer'
+          src='https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/flv/xgplayer-demo-480p.flv' isLive
+          cors soundMode='ear'
+          type='flv'
         ></LivePlayer>
       </View>
     )
