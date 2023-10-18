@@ -24,9 +24,9 @@ export default class PageView extends React.Component {
               <LivePlayer
                 style={{ height: '300px', marginTop: '100px' }} 
                 src='https://sf1-cdn-tos.huoshanstatic.com/obj/media-fe/xgplayer_doc_video/flv/xgplayer-demo-480p.flv'
-                isLive={true}
-                cors={true}
-                autoplay={true}
+                isLive
+                cors
+                autoplay
                 muted={false}
                 orientation='horizontal'
                 type='flv'

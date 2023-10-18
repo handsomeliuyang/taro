@@ -24,6 +24,7 @@
   "collection:main": "dist/collection/index.js",
   "scripts": {
     "prepare": "run-p generate:*",
+    "lint": "eslint src --ext .js --ext .ts --ext .tsx",
     "prebuild": "run-p generate:*",
     "build": "cross-env NODE_ENV=production run-s build:components build:library",
     "build:components": "stencil build",
