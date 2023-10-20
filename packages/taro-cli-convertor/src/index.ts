@@ -236,7 +236,7 @@ export default class Convertor {
       return this.cacheOptions;
     }
   }      
-  export const getDataset = (target) => {
+  export const getTarget = (target) => {
     if (Taro.getEnv() === Taro.ENV_TYPE.MPHARMONY || Taro.getEnv() === Taro.ENV_TYPE.WEB) {
       if (target['fullDataset']) {
         return { dataset: target['fullDataset'] }
@@ -270,9 +270,10 @@ export default class Convertor {
    * 
    * @param self convert 实例对象
    * @param sourceFilePath 解析的文件路径
+   * @param funcName 导入函数名
    * @returns 
    */
-  createConvertToolsRequireAst (self: any, sourceFilePath: string) {
+  createConvertToolsRequireAst (self: any, sourceFilePath: string, funcName: string) {
     // 创建导入工具函数的 ast 节点
     const currentFilePath = sourceFilePath
     const cacheOptionsPath = path.resolve(self.root, 'utils', '_cacheOptions.js')
@@ -280,7 +281,7 @@ export default class Convertor {
     const requireCacheOptionsAst = t.variableDeclaration('const', [
       t.variableDeclarator(
         t.objectPattern([
-          t.objectProperty(t.identifier('cacheOptions'), t.identifier('cacheOptions'), false, true),
+          t.objectProperty(t.identifier(funcName), t.identifier(funcName), false, true),
         ]),
         t.callExpression(t.identifier('require'), [t.stringLiteral(importOptionsUrl)])
       ),
@@ -303,7 +304,7 @@ export default class Convertor {
     let componentClassName: string
     let needInsertImportTaro = false
     let hasCacheOptionsRequired = false
-    let hasDatasetRequired = false
+    let hasgetTargetRequired = false
     traverse(ast, {
       Program: {
         enter (astPath) {
@@ -408,7 +409,7 @@ export default class Convertor {
                   astPath.replaceWith(cacheOptionsAstNode)
 
                   // 创建导入工具函数的 ast 节点
-                  const requireCacheOptionsAst = self.createConvertToolsRequireAst(self, sourceFilePath)
+                  const requireCacheOptionsAst = self.createConvertToolsRequireAst(self, sourceFilePath, 'cacheOptions')
 
                   // 若已经引入过 cacheOptions 则不在引入，防止重复引入问题
                   if (!hasCacheOptionsRequired) {
@@ -427,41 +428,26 @@ export default class Convertor {
                 node.object = t.identifier('Taro')
                 needInsertImportTaro = true
               } else if (t.isIdentifier(prettier) && prettier.name === 'dataset') {
-                node.object = t.callExpression(t.identifier('getDataset'),[object])
-                if (hasCacheOptionsRequired) {
-                  traverse(ast,{
-                    VariableDeclaration (astPath) {
-                      const { kind, declarations } = astPath.node
-                      if (kind === 'const') {
-                        declarations.forEach((declaration) => {
-                          const { id, init } = declaration
-                          if ( t.isObjectPattern(id) 
-                            && t.isCallExpression(init) 
-                            && t.isIdentifier(init.callee)
-                            &&init.callee.name === 'require'
-                            &&t.isStringLiteral(init.arguments[0])
-                          ) {
-                            const currentFilePath = sourceFilePath
-                            const cacheOptionsPath = path.resolve(self.root, 'utils', '_cacheOptions.js')
-                            const importOptionsUrl = promoteRelativePath(path.relative(currentFilePath, cacheOptionsPath))
-                            if (init.arguments[0].value === importOptionsUrl && !hasDatasetRequired) {
-                              const datasetVariableDeclarator =t.objectProperty(t.identifier('getDataset'), t.identifier('getDataset'), false, true)
-                              id.properties.push(datasetVariableDeclarator)
-                              hasDatasetRequired = true
-                            }
-                          }
-                        })
-                      }
-                    }
-                  })
-                } else {
-                  const requireCacheOptionsAst = self.createConvertToolsRequireAst(self, sourceFilePath)
-                  // 若已经引入过 cacheOptions 则不在引入，防止重复引入问题
-                  if (!hasCacheOptionsRequired) {
-                    ast.program.body.unshift(requireCacheOptionsAst)
-                    hasCacheOptionsRequired = true
-                  }
-                  self.generateConvertToolsFile()
+                node.object = t.callExpression(t.identifier('getTarget'),[object])
+                // 保证getTarget只引入一次，防止多次引用
+                if (!hasgetTargetRequired) {
+                  const requireGettargetAst = self.createConvertToolsRequireAst(self, sourceFilePath, 'getTarget')
+                  ast.program.body.unshift(requireGettargetAst)
+                  hasgetTargetRequired = true
+                }
+              }
+            },
+            OptionalMemberExpression (astPath) {
+              const node = astPath.node
+              const object = node.object
+              const prettier = node.property
+              if (t.isIdentifier(prettier) && prettier.name === 'dataset') {
+                node.object = t.callExpression(t.identifier('getTarget'),[object])
+                // 保证getTarget只引入一次，防止多次引用
+                if (!hasgetTargetRequired) {
+                  const requireGettargetAst = self.createConvertToolsRequireAst(self, sourceFilePath, 'getTarget')
+                  ast.program.body.unshift(requireGettargetAst)
+                  hasgetTargetRequired = true
                 }
               }
             },

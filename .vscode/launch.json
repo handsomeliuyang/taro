@@ -47,6 +47,29 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "jzy debug",
+      "program": "${workspaceFolder}/packages/taro-cli-convertor/bin/taro-convert",
+      "cwd": "D:/wechatTest/onClickxxx_test",
+      // "args": [
+      //   "build",
+      //   "--type",
+      //   "weapp",
+      //   "--watch"
+      // ],
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "vs debug",
+      "program": "${workspaceFolder}/packages/taro-cli-convertor/bin/taro-convert",
+      "cwd": "D:/wechatTest/onClickxxx_test",
+      "args": [],
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }
