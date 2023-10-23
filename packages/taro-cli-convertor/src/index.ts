@@ -217,6 +217,7 @@ export default class Convertor {
     let needInsertImportTaro = false
     let hasCacheOptionsRequired = false
     let hasDatasetRequired = false
+    let hasConvertToArrayRequired = false
     const set = new Set()
     traverse(ast, {
       Program: {
@@ -335,6 +336,21 @@ export default class Convertor {
                   if (!hasCacheOptionsRequired) {
                     ast.program.body.unshift(requireCacheOptionsAst)
                     hasCacheOptionsRequired = true
+                  }
+                }else if(callee.name === 'convertToArray'){
+                  // 创建导入 cacheOptions 对象的 ast 节点
+                  const requireCacheOptionsAst = t.variableDeclaration('const', [
+                    t.variableDeclarator(
+                      t.objectPattern([
+                        t.objectProperty(t.identifier('convertToArray'), t.identifier('convertToArray'), false, true),
+                      ]),
+                      t.callExpression(t.identifier('require'), [t.stringLiteral('@tarojs/with-weapp')])
+                    ),
+                  ])
+                  // 若已经引入过 cacheOptions 则不在引入，防止重复引入问题
+                  if (!hasConvertToArrayRequired) {
+                    ast.program.body.unshift(requireCacheOptionsAst)
+                    hasConvertToArrayRequired = true
                   }
                 }
               }

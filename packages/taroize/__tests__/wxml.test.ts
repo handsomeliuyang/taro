@@ -61,6 +61,17 @@ describe('wxml.ts测试', () => {
   })
 })
 
+describe('wx:XX 的测试',() => {
+  test('wx:for 生成对应的 ast 节点，节点包含 convertToArray 函数',() => {
+    option.wxml = `
+      <view wx:for="{{[1,2,3]}}">{{item}}:{{index}}</view>
+    `
+    option.path = 'wxml_wx:for'
+    const { wxml } = parseWXML(option.path, option.wxml)
+    expect(wxml).toMatchSnapshot()
+  })
+})
+
 describe('parseContent', () => {
   test('节点key的值解析', () => {
     const contentInput = `{{list}}`

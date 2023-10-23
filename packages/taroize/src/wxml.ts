@@ -286,6 +286,10 @@ export const createWxmlVistor = (
             if (!jsxExprContainer || !jsxExprContainer.isJSXExpressionContainer()) {
               return
             }
+            // 避免引入的 convertToArray 在render函数中解构
+            if (p.node.name === 'convertToArray') {
+              return
+            }
             if (isValidVarName(p.node.name)) {
               refIds.add(p.node.name)
             }
@@ -736,15 +740,16 @@ function transformLoop (name: string, attr: NodePath<t.JSXAttribute>, jsx: NodeP
       printLog(processTypeEnum.WARNING, 'value.expression', 'wxml.ts -> t.isJSXEmptyExpression(value.expression)')
       return
     }
-    const replacement = t.jSXExpressionContainer(
-      t.callExpression(t.memberExpression(value.expression, t.identifier('map')), [
-        t.arrowFunctionExpression(
-          [t.identifier(item.value), t.identifier(index.value)],
-          t.blockStatement([t.returnStatement(jsx.node)])
-        ),
-      ])
-    )
-
+    // 创建目标节点 将map函数替换为 convertToArray
+    const convertArrNodeAst = t.callExpression(t.identifier('convertToArray'), [
+      value.expression,
+      t.arrowFunctionExpression(
+        [t.identifier(item.value), t.identifier(index.value)],
+        t.blockStatement([t.returnStatement(jsx.node)])
+      ),
+    ])
+    const replacement = t.jSXExpressionContainer(convertArrNodeAst)
+    
     const block = buildBlockElement()
     block.children = [replacement]
     try {
