@@ -1,17 +1,7 @@
 import { codeFrameColumns } from '@babel/code-frame'
-import * as babel from '@babel/core'
 import { parse } from '@babel/parser'
-import classProperties from '@babel/plugin-proposal-class-properties'
-import decorators from '@babel/plugin-proposal-decorators'
-import objectRestSpread from '@babel/plugin-proposal-object-rest-spread'
-import asyncGenerators from '@babel/plugin-syntax-async-generators'
-import dynamicImport from '@babel/plugin-syntax-dynamic-import'
-import exponentiationOperator from '@babel/plugin-transform-exponentiation-operator'
-import flowStrip from '@babel/plugin-transform-flow-strip-types'
-import jsxPlugin from '@babel/plugin-transform-react-jsx'
-import presetTypescript from '@babel/preset-typescript'
 import { default as template } from '@babel/template'
-import { NodePath } from '@babel/traverse'
+import traverse, { NodePath } from '@babel/traverse'
 import * as t from '@babel/types'
 import { camelCase, capitalize } from 'lodash'
 
@@ -42,45 +32,30 @@ export function isValidVarName (str?: string) {
   return true
 }
 
-export function parseCode (code: string, scriptPath?: string) {
-  // 支持TS的解析
-  if (typeof scriptPath !== 'undefined') {
-    return (
-      babel.transformSync(code, {
-        ast: true,
-        sourceType: 'module',
-        filename: scriptPath,
-        presets: [presetTypescript],
-        plugins: [
-          classProperties,
-          jsxPlugin,
-          flowStrip,
-          exponentiationOperator,
-          asyncGenerators,
-          objectRestSpread,
-          [decorators, { legacy: true }],
-          dynamicImport,
-        ],
-      }) as { ast: t.File }
-    ).ast
-  }
-
-  return (
-    babel.transformSync(code, {
-      ast: true,
-      sourceType: 'module',
-      plugins: [
-        classProperties,
-        jsxPlugin,
-        flowStrip,
-        exponentiationOperator,
-        asyncGenerators,
-        objectRestSpread,
-        [decorators, { legacy: true }],
-        dynamicImport,
-      ],
-    }) as { ast: t.File }
-  ).ast
+export function parseCode (code: string, sourcePath?: string) {
+  const ast:any = parse(code, {
+    sourceFilename: sourcePath,
+    sourceType: 'module',
+    plugins: [
+      // 'classProperties',   //最新版本已启用 
+      'jsx',
+      'flow',
+      // 'asyncGenerators',   //最新版本已启用
+      'decorators-legacy',
+      // 'dynamicImport',     //最新版本已启用
+      // 'objectRestSpread',  //最新版本已启用
+      ['optionalChainingAssign',{ version: '2023-07' }],
+      'sourcePhaseImports',
+      'throwExpressions'
+    ],
+  })
+  // 移除Flow类型注释
+  traverse(ast,{
+    TypeAnnotation (path) {
+      path.remove()
+    }
+  })
+  return ast
 }
 
 export const buildTemplate = (str: string) => {
