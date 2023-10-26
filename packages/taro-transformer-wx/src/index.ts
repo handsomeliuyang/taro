@@ -203,27 +203,28 @@ export interface TransformResult extends Result {
 
 export type TransformOptions = Options
 
-function parseCode(code: string) {
-  const ast:any = parse(code, {
+export function parseCode (code: string, sourcePath?: string) {
+  const ast: any = parse(code, {
+    sourceFilename: sourcePath,
     sourceType: 'module',
     plugins: [
-      // 'classProperties',   //最新版本已启用 
+      // 'classProperties',   //最新版本已启用
       'jsx',
       'flow',
       // 'asyncGenerators',   //最新版本已启用
       'decorators-legacy',
       // 'dynamicImport',     //最新版本已启用
       // 'objectRestSpread',  //最新版本已启用
-      ['optionalChainingAssign',{ version:'2023-07'}],
+      ['optionalChainingAssign', { version: '2023-07' }],
       'sourcePhaseImports',
-      'throwExpressions'
+      'throwExpressions',
     ],
   })
   // 移除Flow类型注释
-  traverse(ast,{
-    TypeAnnotation(path){
+  traverse(ast, {
+    TypeAnnotation (path) {
       path.remove()
-    }
+    },
   })
   return ast
 }
