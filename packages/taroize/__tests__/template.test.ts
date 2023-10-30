@@ -59,4 +59,22 @@ describe('template.ts', () => {
       expect(() => parseWXML(dirPath, wxml)).toThrowError('import 标签必须包含 `src` 属性')
     })
   })
+
+  describe('template使用外部wxs工具类', () => {
+    test('当template同时使用外部工具类和data传递数据', () => {
+      const wxml = `
+      <wxs src="../utils/myFunc.wxs" module="myFunc"/>
+      <wxs src="../utils/timFunc.wxs" module="Tim"/>
+      <template name="huangye">
+          <text>{{ myFunc.getMsg }}</text>
+          <view>{{ Tim.getMsg }}</view>
+          <view>{{ '姓名：' + info.name + '年龄：' + info.age }}</view>
+      </template>
+      <template is="huangye" data="{{ info }}"/>
+      `
+      const dirPath = 'import_wxs_src'
+      const paresResult = parseWXML(dirPath, wxml)
+      expect(paresResult).toMatchSnapshot()
+    })
+  })
 })
