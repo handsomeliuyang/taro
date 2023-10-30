@@ -49,7 +49,7 @@ export function parseCode (code: string, scriptPath?: string) {
         'sourcePhaseImports',
         'throwExpressions',
         'deferredImportEvaluation',
-        'exportDefaultFrom'
+        'exportDefaultFrom',
       ],
     })
   } else {
@@ -63,7 +63,7 @@ export function parseCode (code: string, scriptPath?: string) {
         'sourcePhaseImports',
         'throwExpressions',
         'deferredImportEvaluation',
-        'exportDefaultFrom'
+        'exportDefaultFrom',
       ],
     })
   }
@@ -319,4 +319,17 @@ export function printToLogFile (data: string) {
     console.error('写日志文件异常')
     throw error
   }
+}
+
+/**
+ * 路径标准化
+ *
+ * @param { string } path 文件路径
+ * @returns { string } 标准化后的路径
+ */
+export function normalizePath (path) {
+  if (typeof path === 'undefined') {
+    return ''
+  }
+  return path.replace(/\\/g, '/')
 }

@@ -6,6 +6,7 @@ import { printLog, processTypeEnum } from '@tarojs/helper'
 import { toCamelCase } from '@tarojs/shared'
 import { parse } from 'himalaya-wxml'
 import { camelCase, cloneDeep } from 'lodash'
+import * as pathTool from 'path'
 
 import { getCacheWxml, saveCacheWxml } from './cache'
 import { reserveKeyWords } from './constant'
@@ -19,6 +20,7 @@ import {
   codeFrameError,
   DEFAULT_Component_SET,
   isValidVarName,
+  normalizePath,
   parseCode,
 } from './utils'
 
@@ -84,7 +86,7 @@ export interface Imports {
 
 /**
  * wxml界面下的template模板信息
- * 
+ *
  * @param { any[] } funcs 模板所用方法集
  * @param { any[] } applyTemplates 套用模板集
  */
@@ -214,13 +216,11 @@ export function convertStyleUnit (value: string) {
 
 /**
  * 预解析，收集wxml所有的模板信息
- * 
+ *
  * @param { any[] } templates wxml页面下的模板信息
  * @returns Visitor
  */
-export const createPreWxmlVistor = (
-  templates: Map<string, Templates>
-) => {
+export const createPreWxmlVistor = (templates: Map<string, Templates>) => {
   // const Applys = new Map<string, string[]>()
   return {
     JSXElement: {
@@ -241,8 +241,8 @@ export const createPreWxmlVistor = (
             applyTemplates: templateInfo.applys,
           })
         }
-      }
-    }
+      },
+    },
   } as Visitor
 }
 
@@ -252,7 +252,7 @@ export const createWxmlVistor = (
   dirPath: string,
   wxses: WXS[] = [],
   imports: Imports[] = [],
-  templates?: Map<string, Templates>,
+  templates?: Map<string, Templates>
 ) => {
   const jsxAttrVisitor = (path: NodePath<t.JSXAttribute>) => {
     const name = path.node.name as t.JSXIdentifier
@@ -307,7 +307,7 @@ export const createWxmlVistor = (
       } else if (nodeName.startsWith('wx:') && !wxTemplateCommand.includes(nodeName)) {
         // eslint-disable-next-line no-console
         console.log(`未知 wx 作用域属性： ${nodeName}，该属性会被移除掉。`)
-        path.parentPath.remove()
+        // path.parentPath.remove()
       }
     }
   }
@@ -327,7 +327,7 @@ export const createWxmlVistor = (
         if (isValidVarName(path.node.name)) {
           refIds.add(path.node.name)
         }
-      }
+      },
     },
     JSXElement: {
       enter (path: NodePath<t.JSXElement>) {
@@ -338,6 +338,18 @@ export const createWxmlVistor = (
           return
         }
         path.traverse({
+          Identifier (p) {
+            if (!p.isReferencedIdentifier()) {
+              return
+            }
+            const jsxExprContainer = p.findParent((p) => p.isJSXExpressionContainer())
+            if (!jsxExprContainer || !jsxExprContainer.isJSXExpressionContainer()) {
+              return
+            }
+            if (isValidVarName(p.node.name)) {
+              refIds.add(p.node.name)
+            }
+          },
           JSXAttribute: jsxAttrVisitor,
           JSXIdentifier: renameJSXKey,
         })
@@ -404,10 +416,14 @@ export const createWxmlVistor = (
           // path.traverse({
           //   JSXAttribute: jsxAttrVisitor
           // })
-          const template = parseTemplate(path, dirPath)
+          const template = parseTemplate(path, dirPath, wxses)
           if (template) {
             let funcs = new Set<string>()
-            const { ast: classDecl, name, tmplName } = template
+            const { ast: classDecl, name, tmplName, usedWxses } = template
+            const wxsImports = getWxsImports(name, usedWxses, dirPath)
+            // const wxsAbsPath = pathTool.resolve(dirPath, `${Array.from(usedWxses)[0].src}.js`)
+            // const wxsRelPath = pathTool.relative(pathTool.dirname(templatePath), wxsAbsPath)
+            // const wxsImport = buildImportStatement(normalizePath(wxsRelPath), [], Array.from(usedWxses)[0].module)
             const taroComponentsImport = buildImportStatement('@tarojs/components', [...usedComponents])
             const taroImport = buildImportStatement('@tarojs/taro', [], 'Taro')
             const reactImport = buildImportStatement('react', [], 'React')
@@ -419,6 +435,7 @@ export const createWxmlVistor = (
               reactImport,
               taroImport,
               withWeappImport,
+              ...wxsImports,
               classDecl,
               t.exportDefaultDeclaration(t.identifier(name))
             )
@@ -555,6 +572,26 @@ export const createWxmlVistor = (
       },
     },
   } as Visitor
+}
+
+/**
+ * 根据template中使用的wxs组装需要导入的wxs语句
+ * 如： import xxx from '../xxx.wxs.js'
+ *
+ * @param templateFileName 模版文件名
+ * @param usedWxses template中使用的wxs信息集合
+ * @param dirPath 当前解析文件的路径
+ * @returns 需要导入的wxs语句集合
+ */
+function getWxsImports (templateFileName, usedWxses, dirPath) {
+  const templatePath = pathTool.join(globals.rootPath, 'imports', `${templateFileName}.js`)
+  const wxsImports: (t.ImportDeclaration | t.VariableDeclaration)[] = []
+  for (const usedWxs of usedWxses) {
+    const wxsAbsPath = pathTool.resolve(dirPath, `${usedWxs.src}.js`)
+    const wxsRelPath = pathTool.relative(pathTool.dirname(templatePath), wxsAbsPath)
+    wxsImports.push(buildImportStatement(normalizePath(wxsRelPath), [], usedWxs.module))
+  }
+  return wxsImports
 }
 
 /**
