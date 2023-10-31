@@ -19,10 +19,12 @@ import {
   codeFrameError,
   DEFAULT_Component_SET,
   isValidVarName,
+  normalizePath,
   parseCode,
 } from './utils'
 
 const { prettyPrint } = require('html')
+const pathTool = require('path')
 
 const allCamelCase = (str: string) => str.charAt(0).toUpperCase() + camelCase(str.substr(1))
 
@@ -128,9 +130,9 @@ function convertStyleAttrs (styleAttrsMap: any[]) {
     const attrValueReg = /([^{}]*)\{\{([^{}]*)\}\}([^{}]*)/
     const matchs = attrValueReg.exec(attr.value)
     if (matchs !== null) {
-      const tempLeftValue = matchs[1]?.trim() || ''
-      const tempMidValue = matchs[2]?.trim() || ''
-      const tempRightValue = matchs[3]?.trim() || ''
+      const tempLeftValue = matchs[1] || ''
+      const tempMidValue = matchs[2] || ''
+      const tempRightValue = matchs[3] || ''
       // 将模版中的内容转换为 ast 节点
       const tempMidValueAst = parseFile(tempMidValue).program.body[0] as any
       attr.value = t.templateLiteral(
@@ -244,6 +246,26 @@ export const createPreWxmlVistor = (
       }
     }
   } as Visitor
+}
+
+/**
+ * 根据template中使用的wxs组装需要导入的wxs语句
+ * 如： import xxx from '../xxx.wxs.js'
+ *
+ * @param templateFileName template模版文件名
+ * @param usedWxses template中使用的变量是wxs模块的集合
+ * @param dirPath 当前解析文件的路径
+ * @returns 需要导入的wxs语句集合
+ */
+export function getWxsImports (templateFileName, usedWxses, dirPath) {
+  const templatePath = pathTool.join(globals.rootPath, 'imports', `${templateFileName}.js`)
+  const wxsImports: (t.ImportDeclaration | t.VariableDeclaration)[] = []
+  for (const usedWxs of usedWxses) {
+    const wxsAbsPath = pathTool.resolve(dirPath, `${usedWxs.src}.js`)
+    const wxsRelPath = pathTool.relative(pathTool.dirname(templatePath), wxsAbsPath)
+    wxsImports.push(buildImportStatement(normalizePath(wxsRelPath), [], usedWxs.module))
+  }
+  return wxsImports
 }
 
 export const createWxmlVistor = (
@@ -401,13 +423,11 @@ export const createWxmlVistor = (
           )
         }
         if (tagName === 'Template') {
-          // path.traverse({
-          //   JSXAttribute: jsxAttrVisitor
-          // })
-          const template = parseTemplate(path, dirPath)
+          const template = parseTemplate(path, dirPath, wxses)
           if (template) {
             let funcs = new Set<string>()
-            const { ast: classDecl, name, tmplName } = template
+            const { ast: classDecl, name, tmplName, usedWxses } = template
+            const wxsImports = getWxsImports(name, usedWxses, dirPath)
             const taroComponentsImport = buildImportStatement('@tarojs/components', [...usedComponents])
             const taroImport = buildImportStatement('@tarojs/taro', [], 'Taro')
             const reactImport = buildImportStatement('react', [], 'React')
@@ -419,6 +439,7 @@ export const createWxmlVistor = (
               reactImport,
               taroImport,
               withWeappImport,
+              ...wxsImports,
               classDecl,
               t.exportDefaultDeclaration(t.identifier(name))
             )
@@ -718,7 +739,7 @@ function getWXS (attrs: t.JSXAttribute[], path: NodePath<t.JSXElement>, imports:
           if (path.node.arguments.length > 1) {
             const regex = path.node.arguments[0]
             const modifier = path.node.arguments[1]
-            if (t.isStringLiteral(regex)) {
+            if (t.isStringLiteral(regex) && t.isStringLiteral(modifier)) {
               const regexStr = regex.extra?.raw as string
               const regexModifier = modifier.extra?.rawValue as string
               const regexWithoutQuotes = regexStr.replace(/^['"](.*)['"]$/, '$1')
@@ -727,15 +748,26 @@ function getWXS (attrs: t.JSXAttribute[], path: NodePath<t.JSXElement>, imports:
                 t.stringLiteral(regexModifier),
               ])
               path.replaceWith(newExpr)
+            } else if (t.isIdentifier(regex) || t.isIdentifier(modifier)) {
+              throw new Error('getRegExp 函数暂不支持传入变量类型的参数')
+            } else {
+              throw new Error('getRegExp 函数暂不支持传入非字符串类型的参数')
             }
-          } else {
+          } else if (path.node.arguments.length === 1) {
             const regex = path.node.arguments[0]
             if (t.isStringLiteral(regex)) {
               const regexStr = regex.extra?.raw as string
               const regexWithoutQuotes = regexStr.replace(/^['"](.*)['"]$/, '$1')
               const newExpr = t.newExpression(t.identifier('RegExp'), [t.stringLiteral(regexWithoutQuotes)])
               path.replaceWith(newExpr)
+            } else if (t.isIdentifier(regex)) {
+              throw new Error('getRegExp 函数暂不支持传入变量类型的参数')
+            } else {
+              throw new Error('getRegExp 函数暂不支持传入非字符串类型的参数')
             }
+          } else {
+            const newExpr = t.newExpression(t.identifier('RegExp'), [])
+            path.replaceWith(newExpr)
           }
         }
       },
