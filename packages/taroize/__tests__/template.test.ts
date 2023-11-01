@@ -1,4 +1,5 @@
 import { globals } from '../src/global'
+import { buildTemplateName } from '../src/template'
 import { parseWXML } from '../src/wxml'
 import { generateMinimalEscapeCode } from './util'
 
@@ -101,6 +102,45 @@ describe('template.ts', () => {
       Object.defineProperty(globals, 'rootPath', {
         get: () => rootPath
       })
+    })
+  })
+
+  describe('templete中is属性解析', () => {
+    test('is属性为全小写', () => {
+      const inputValue = 'ash'
+      const tempName = buildTemplateName(inputValue)
+      expect(tempName).toBe('AshTmpl')
+    })
+
+    test('is属性为首字母大写', () => {
+      const inputValue = 'Aol'
+      const tempName = buildTemplateName(inputValue)
+      expect(tempName).toBe('AolTmpl')
+    })
+
+    test('is属性为大驼峰', () => {
+      const inputValue = 'AshMer'
+      const tempName = buildTemplateName(inputValue)
+      expect(tempName).toBe('AshMerTmpl')
+    })
+
+    test('is属性为单字母', () => {
+      const inputValue = 'a'
+      const tempName = buildTemplateName(inputValue)
+      expect(tempName).toBe('ATmpl')
+    })
+
+    test('is属性为小驼峰', () => {
+      const inputValue = 'anFish'
+      const tempName = buildTemplateName(inputValue)
+      expect(tempName).toBe('AnFishTmpl')
+    })
+
+    test('is属性为变量引用', () => {
+      const inputName = 'x'
+      const inputValue = `{{ ${ inputName } }}`
+      const tempName = buildTemplateName(inputValue)
+      expect(tempName).toBe('XTmpl')
     })
   })
 })
