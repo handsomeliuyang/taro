@@ -212,6 +212,117 @@ export default class Convertor {
 
   wxsIncrementId = incrementId()
 
+  /**
+   * 遍历AST，为元素或方法可能为undefined的数据添加可选链操作符
+   * @param ast
+   */
+  convertToOptional (ast: t.File) {
+    // 需要添加可选链运算符的数据
+    const optionalData = new Set<string>()
+    const thisData = new Set<string>()
+    traverse(ast, {
+      ObjectProperty (astPath) {
+        // xxx({ data: {...} })，获取data属性中符合的数据
+        const node = astPath.node
+        const key = node.key
+        if (!t.isIdentifier(key) || key.name !== 'data') {
+          return
+        }
+        const value = node.value
+        if (!t.isObjectExpression(value)) {
+          return
+        }
+        const properties = value.properties
+        properties.forEach((property) => {
+          if (!t.isObjectProperty(property)) {
+            return
+          }
+          const key = property.key
+          if (!t.isIdentifier(key)) {
+            return
+          }
+          const data = key.name
+          thisData.add(data)
+          // 数据初始化为undefined、空字符串''、空数组[]，收集
+          const assign = property.value
+          const isUndefined = t.isIdentifier(assign) && assign.name === 'undefined'
+          const isEmptyString = t.isStringLiteral(assign) && assign.value === ''
+          const isEmptyArray = t.isArrayExpression(assign) && assign.elements.length === 0
+          if (isUndefined || isEmptyString || isEmptyArray) {
+            optionalData.add(data)
+          }
+        })
+      },
+      CallExpression (astPath) {
+        // 用setData进行初始化的数据
+        const node = astPath.node
+        const callee = node.callee
+        if (!t.isMemberExpression(callee)) {
+          return
+        }
+        const property = callee.property
+        if (!t.isIdentifier(property) || property.name !== 'setData') {
+          return
+        }
+        if (node.arguments.length === 0) {
+          return
+        }
+        const arg = node.arguments[0]
+        // 除去data中的数据，setData中其余全部的数据都收集
+        if (arg.type === 'ObjectExpression') {
+          arg.properties.forEach((property) => {
+            if (!t.isObjectProperty(property)) {
+              return
+            }
+            const key = property.key
+            if (!t.isIdentifier(key)) {
+              return
+            }
+            const data = key.name
+            if (thisData.has(data)) {
+              return
+            }
+            optionalData.add(data)
+          })
+        }
+      },
+      ClassBody (astPath) {
+        astPath.traverse({
+          MemberExpression (path) {
+            // 遇到成员表达式，抽取表达式的来源数据
+            const code = path.toString()
+            const optionMatch = code.match(/^(.*?)\./)?.[1]
+            let data: string
+            if (optionMatch) {
+              const computedMatch = optionMatch.match(/^(.*?)\[/)?.[1]
+              data = computedMatch || optionMatch
+            } else {
+              const computedMatch = code.match(/^(.*?)\[/)?.[1]
+              if (!computedMatch) {
+                return
+              }
+              data = computedMatch
+            }
+            // 如果数据不需要添加可选链操作符，返回
+            if (!optionalData.has(data)) {
+              return
+            }
+            // 利用正则表达式匹配，添加可选链操作符
+            const parentPath = path.parentPath
+            if (parentPath.isCallExpression()) {
+              path.replaceWithSourceString(code.replace(/\./g, '?.').replace(/\[/g, '?.['))
+              const callee = parentPath.node.callee as t.Expression
+              const args = parentPath.node.arguments
+              parentPath.replaceWith(t.optionalCallExpression(callee, args, false))
+            } else {
+              path.replaceWithSourceString(code.replace(/\./g, '?.').replace(/\[/g, '?.['))
+            }
+          },
+        })
+      },
+    })
+  }
+
   parseAst ({ ast, sourceFilePath, outputFilePath, importStylePath, depComponents, imports = [] }: IParseAstOptions): {
     ast: t.File
     scriptFiles: Set<string>
@@ -252,6 +363,7 @@ export default class Convertor {
             },
 
             ClassExpression (astPath) {
+              printToLogFile(`package: taro-cli-convertor, 解析ClassExpression: ${astPath} ${getLineBreak()}`)
               const node = astPath.node
               if (node.superClass) {
                 let isTaroComponent = false
@@ -309,7 +421,7 @@ export default class Convertor {
               analyzeImportUrl(self.root, sourceFilePath, scriptFiles, source, value, self.isTsProject)
             },
             CallExpression (astPath) {
-              printToLogFile(`解析CallExpression: ${astPath} ${getLineBreak()}`)
+              printToLogFile(`package: taro-cli-convertor, 解析CallExpression: ${astPath} ${getLineBreak()}`)
               const node = astPath.node
               const calleePath = astPath.get('callee')
               const callee = calleePath.node
@@ -384,6 +496,7 @@ export default class Convertor {
               }
             },
             OptionalMemberExpression (astPath) {
+              printToLogFile(`package: taro-cli-convertor, 解析OptionalMemberExpression: ${astPath} ${getLineBreak()}`)
               const node = astPath.node
               const object = node.object
               const prettier = node.property
@@ -606,22 +719,21 @@ export default class Convertor {
             }
             if (imports && imports.length) {
               imports.forEach(({ name, ast, wxs }) => {
-                const importName = wxs ? name : pascalCase(name)
-                if (componentClassName === importName) {
+                if (componentClassName === name) {
                   return
                 }
                 const importPath = path.join(
                   self.importsDir,
-                  importName + (wxs ? self.wxsIncrementId() : '') + (self.isTsProject ? '.ts' : '.js')
+                  name + (wxs ? self.wxsIncrementId() : '') + (self.isTsProject ? '.ts' : '.js')
                 )
                 if (!self.hadBeenBuiltImports.has(importPath)) {
                   self.hadBeenBuiltImports.add(importPath)
                   self.writeFileToTaro(importPath, prettier.format(generateMinimalEscapeCode(ast), prettierJSConfig))
                 }
-                if (scriptComponents.indexOf(importName) !== -1 || (wxs && wxs === true)) {
+                if (scriptComponents.indexOf(name) !== -1 || (wxs && wxs === true)) {
                   lastImport.insertAfter(
                     template(
-                      `import ${importName} from '${promoteRelativePath(path.relative(outputFilePath, importPath))}'`,
+                      `import ${name} from '${promoteRelativePath(path.relative(outputFilePath, importPath))}'`,
                       babylonConfig
                     )() as t.Statement
                   )
@@ -654,6 +766,9 @@ export default class Convertor {
         },
       },
     })
+
+    this.convertToOptional(ast)
+
     // 遍历 ast ,将多次 const { xxx } = require('@tarojs/with-weapp')  引入压缩为一次引入
     traverse(ast, {
       VariableDeclaration (astPath) {
@@ -898,6 +1013,7 @@ export default class Convertor {
             sourcePath: file,
             isNormal: true,
             isTyped: REG_TYPESCRIPT.test(file),
+            logFilePath: globals.logFilePath,
           })
           const { ast, scriptFiles } = this.parseAst({
             ast: transformResult.ast,
@@ -1088,7 +1204,7 @@ ${code}
 
   traversePages () {
     this.pages.forEach((page) => {
-      printToLogFile(`开始转换页面 ${page} ${getLineBreak()}`)
+      printToLogFile(`package: taro-cli-convertor, 开始转换页面 ${page} ${getLineBreak()}`)
       const pagePath = this.isTsProject ? path.join(this.miniprogramRoot, page) : path.join(this.root, page)
 
       // 处理不转换的页面，可在convert.config.json中external字段配置
@@ -1203,7 +1319,7 @@ ${code}
       } catch (err) {
         printLog(processTypeEnum.ERROR, '页面转换', this.generateShowPath(pageJSPath))
         console.log(err)
-        printToLogFile(`转换页面异常 ${err.stack} ${getLineBreak()}`)
+        printToLogFile(`package: taro-cli-convertor, 转换页面异常 ${err.stack} ${getLineBreak()}`)
       }
     })
   }
@@ -1213,6 +1329,7 @@ ${code}
       return
     }
     components.forEach((componentObj) => {
+      printToLogFile(`package: taro-cli-convertor, 开始转换组件 ${componentObj.path} ${getLineBreak()}`)
       const component = componentObj.path
       if (this.hadBeenBuiltComponents.has(component)) return
       this.hadBeenBuiltComponents.add(component)
@@ -1296,6 +1413,7 @@ ${code}
       } catch (err) {
         printLog(processTypeEnum.ERROR, '组件转换', this.generateShowPath(componentJSPath))
         console.log(err)
+        printToLogFile(`package: taro-cli-convertor, 转换组件异常 ${err.stack} ${getLineBreak()}`)
       }
     })
   }
@@ -1340,6 +1458,7 @@ ${code}
   }
 
   async traverseStyle (filePath: string, style: string) {
+    printToLogFile(`package: taro-cli-convertor, 开始转换样式 ${filePath} ${getLineBreak()}`)
     const { imports, content } = processStyleImports(style, (str, stylePath) => {
       let relativePath = stylePath
       if (path.isAbsolute(relativePath)) {
