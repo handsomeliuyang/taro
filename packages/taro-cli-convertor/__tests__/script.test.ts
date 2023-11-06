@@ -173,3 +173,87 @@ describe('文件转换', () => {
     expect(paresResult).toMatchSnapshot()
   })
 })
+
+describe('page页面转换', () => {
+  let convert
+  let param: ITaroizeOptions
+  const entryJSON = { pages: ['pages/index/index'] }
+  beforeAll(() => {
+  /**
+     * json：index.json的内容
+     * path：index的根目录（文件路径)
+     * rootPath：小程序的根目录（文件路径）
+     * script：index.js的内容
+     * scriptPath：index.js的绝对路径
+     * wxml：index.html的内容
+     * logFilePath：convert.log的文件路径
+     */
+    param = {
+      json: '{}',
+      path: '',
+      rootPath: '',
+      script: '',
+      scriptPath: '',
+      wxml: '',
+      logFilePath: ''
+    }
+
+    jest.spyOn(Convertor.prototype, 'init').mockImplementation(() => {})
+
+    // new Convertot后会直接执行 init()，为确保 init() 在测试中通过采用 spyOn 去模拟
+    jest.spyOn(Convertor.prototype, 'getApp').mockImplementation(() => {
+      Convertor.prototype.entryJSON = entryJSON
+    })
+    jest.spyOn(Convertor.prototype, 'getPages').mockImplementation(() => {
+      Convertor.prototype.pages = new Set(entryJSON.pages)
+    })
+    convert = new Convertor('', false)
+    convert.pages = Convertor.prototype.pages
+  })
+  
+  test('template组件名转换', () => {
+    param.wxml = `
+  <template name="ash">
+  </template>
+  <template name="Aol">
+  </template>
+  <template name="AshMer">
+  </template>
+  <template name="a">
+  </template>
+  <template name="anFish">
+  </template>
+  <template is="ash"/>
+  <template is="Aol"/>
+  <template is="AshMer"/>
+  <template is="a"/>
+  <template is="anFish"/>
+  `
+    param.path = 'import_template'
+    // 模拟文件结构，确认写入路径正确
+    convert.importsDir = 'D:\\wechatTest\\C_component_test\\taroConvert\\src\\imports'
+    const outputFilePath = 'D:\\wechatTest\\C_component_test\\taroConvert\\src\\pages\\C_component\\C_component.js'
+    // 模拟writeFileToTaro文件写入方法，避免imports文件夹写入到taro工程
+    jest.spyOn(Convertor.prototype,'writeFileToTaro').mockImplementation(() => {})
+    const taroizeResult = taroize({
+      ...param,
+      framework:'react'
+    })
+    /**
+   * sourceFilePath：需要转换的文件路径
+   * outputFilePath：转换输出路径
+   * importStylePath：style的文件路径
+   */
+    const { ast } = convert.parseAst({
+      ast: taroizeResult.ast,
+      sourceFilePath: '',
+      outputFilePath: outputFilePath,
+      importStylePath: '',
+      depComponents: new Set(),
+      imports: taroizeResult.imports
+    })
+  
+    const jsCode = generateMinimalEscapeCode(ast)
+    expect(jsCode).toMatchSnapshot()
+  })
+})
