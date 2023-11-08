@@ -1031,12 +1031,6 @@ export default class Convertor {
       this.entryJSONPath = path.join(this.root, `app${this.fileTypes.CONFIG}`)
       this.entryStylePath = path.join(this.root, `app${this.fileTypes.STYLE}`)
     }
-    // 如果在 miniprogramRoot 目录下找到 app.json 文件，则将入口文件和配置文件路径修改为对应的路径
-    if (this.miniprogramRoot && fs.existsSync(path.join(this.root, `app${this.fileTypes.CONFIG}`))) {
-      this.entryJSPath = path.join(this.root, `app${this.fileTypes.SCRIPT}`)
-      this.entryJSONPath = path.join(this.root, `app${this.fileTypes.CONFIG}`)
-      this.entryStylePath = path.join(this.root, `app${this.fileTypes.STYLE}`)
-    }
 
     try {
       this.entryJSON = JSON.parse(String(fs.readFileSync(this.entryJSONPath)))

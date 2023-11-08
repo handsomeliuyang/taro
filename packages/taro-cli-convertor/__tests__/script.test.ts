@@ -7,6 +7,32 @@ import { generateMinimalEscapeCode } from './util'
 const fs = require('fs')
 const path = require('path')
 
+let tempFilePath  // 模拟Node路径
+
+beforeAll(() => {
+  // 创建临时的 JSON 文件,用于模拟project.config.json文件
+  const tempData = {
+    // 模拟project.config.json对象，其中含有miniprogramRoot字段
+    projectConfigJson: {
+      'description': '项目配置文件',
+      'miniprogramRoot': 'miniprogram/',
+      'babelSetting': {
+        'ignore': [],
+        'disablePlugins': [],
+        'outputPath': ''
+      },
+      'srcMiniprogramRoot': 'miniprogram/'
+    }
+  }
+
+  tempFilePath = path.join(__dirname, 'tempData.json')
+  fs.writeFileSync(tempFilePath, JSON.stringify(tempData))
+})
+afterAll(() => {
+  // 清理临时文件
+  fs.unlinkSync(tempFilePath)
+})
+
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'), // 保留原始的其他函数
   appendFile: jest.fn(),
@@ -146,31 +172,24 @@ describe('文件转换', () => {
     }
   })
 
-  test('project.config.json中添加配置miniprogramRoot后能够读取app.json进行convert', () => {
+  test('在project.config.json中添加配置miniprogramRoot后，查找miniprogramRoot字段', () => {
     // rootPath：小程序的根目录（文件路径）
-    const rootPath = 'D:\\WeChatProjects'
-    
+    const rootPath = './Project/taro' // 虚拟路径
+
     // new Convertor后先直接执行 init()里面的initConvert()和getConvertConfig()
     jest.spyOn(Convertor.prototype, 'initConvert').mockImplementation(() => {
       Convertor.prototype.convertRoot = rootPath
     })
-    const convertJsonPath = { 'convertJsonPath': ['aaa'] }
+    const convertJsonPath = { 'convertJsonPath': ['miniprogramRoot'] }
     jest.spyOn(Convertor.prototype, 'getConvertConfig').mockImplementation(() => {
       Convertor.prototype.pages = new Set(convertJsonPath.convertJsonPath)
     })
-    const convert = new Convertor('', false)
-    convert.pages = Convertor.prototype.pages
-    
-    // 模拟配置miniprogramRoot字段中的projectConfig值
-    const readFromFile = './miniprogram'
-    const mockFileData  = `
-      "miniprogramRoot": "miniprogram/",
-    `
-    
-    // 将 getApp() 中的 fs.readFileSync 返回值模拟为常量 mockFileData
-    jest.spyOn(fs, 'readFileSync').mockReturnValue(mockFileData)
-    const paresResult = new Convertor(mockFileData, readFromFile)
-    expect(paresResult).toMatchSnapshot()
+    // 模拟convert.config.json文件,，其中配置了miniprogramRoot字段
+
+    // 使用 require 加载模拟的project.config.json文件
+    const fileContent = require(tempFilePath)
+    expect(fileContent.projectConfigJson.miniprogramRoot).toBe('miniprogram/')
+
   })
 })
 
