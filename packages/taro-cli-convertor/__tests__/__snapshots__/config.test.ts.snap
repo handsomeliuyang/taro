@@ -1,0 +1,65 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`convert.config.json配置转换 project.config.json中添加配置miniprogramRoot后能够读取app.json进行convert 1`] = `
+Map {
+  "/wxProject/taroConvert/src/app.js" => "import withWeapp, { cacheOptions } from \\"@tarojs/with-weapp\\";
+import { Block } from \\"@tarojs/components\\";
+import React from \\"react\\";
+import Taro from \\"@tarojs/taro\\";
+cacheOptions.setOptionsToCache({});
+@withWeapp(cacheOptions.getOptionsFromCache(), true)
+class App extends React.Component {
+  render() {
+    return this.props.children;
+  }
+}
+export default App;",
+}
+`;
+
+exports[`convert.config.json配置转换 project.config.json中添加配置miniprogramRoot后能够读取app.json进行convert 2`] = `
+Convertor {
+  "components": Set {},
+  "convertDir": "\\\\wxProject\\\\taroConvert\\\\src",
+  "convertRoot": "\\\\wxProject\\\\taroConvert",
+  "entryJSON": Object {
+    "pages": Array [
+      "pages/index/index",
+    ],
+  },
+  "entryJSONPath": "\\\\wxProject\\\\miniprogram\\\\app.json",
+  "entryJSPath": "\\\\wxProject\\\\miniprogram\\\\app.js",
+  "entryStylePath": "\\\\wxProject\\\\miniprogram\\\\app.wxss",
+  "fileTypes": Object {
+    "CONFIG": ".json",
+    "SCRIPT": ".js",
+    "STYLE": ".wxss",
+    "TEMPL": ".wxml",
+  },
+  "framework": "react",
+  "hadBeenBuiltComponents": Set {},
+  "hadBeenBuiltImports": Set {},
+  "hadBeenCopyedFiles": Set {},
+  "importsDir": "\\\\wxProject\\\\taroConvert\\\\src\\\\imports",
+  "isTsProject": false,
+  "miniprogramRoot": "miniprogram/",
+  "pages": Set {
+    "pages/index/index",
+  },
+  "pluginInfo": Object {
+    "entryFilePath": "",
+    "pages": Set {},
+    "pagesMap": Map {},
+    "pluginName": "",
+    "pluginRoot": "",
+    "publicComponents": Set {},
+  },
+  "projectConfig": Object {
+    "compileType": "",
+    "pluginRoot": "",
+  },
+  "reportErroMsg": Array [],
+  "root": "\\\\wxProject\\\\miniprogram",
+  "wxsIncrementId": [Function],
+}
+`;
