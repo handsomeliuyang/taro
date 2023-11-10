@@ -1009,7 +1009,7 @@ export default class Convertor {
           this.projectConfig = { ...projectConfigJson }
           this.pluginInfo.pluginRoot = path.join(this.root, projectConfigJson.pluginRoot.replace(/\/+$/, ''))
         }
-        // 解析miniprogramRoot字段，如果存在就更新小程序root
+        // 解析miniprogramRoot字段，如果存在则更新小程序root
         if (projectConfigJson.miniprogramRoot) {
           this.root = path.join(this.root, projectConfigJson.miniprogramRoot.replace(/\/+$/, ''))
         }
