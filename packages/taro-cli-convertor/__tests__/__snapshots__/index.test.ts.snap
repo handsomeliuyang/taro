@@ -16,6 +16,30 @@ class _C extends React.Component {
 export default _C;"
 `;
 
+exports[`parseAst wx:if中使用js内置对象(如Array.isArray)时将Array视作data属性值 1`] = `
+"import withWeapp, { cacheOptions } from \\"@tarojs/with-weapp\\";
+import { Block, Text } from \\"@tarojs/components\\";
+import React from \\"react\\";
+import Taro from \\"@tarojs/taro\\";
+cacheOptions.setOptionsToCache({
+  data: {
+    info: {
+      strArray: [1, 2, 3]
+    }
+  }
+});
+@withWeapp(cacheOptions.getOptionsFromCache())
+class _C extends React.Component {
+  render() {
+    const {
+      info
+    } = this.data;
+    return Array.isArray(info.strArray) && 1 > 0 && <Block><Text>显示内容</Text></Block>;
+  }
+}
+export default _C;"
+`;
+
 exports[`parseAst 当使用e.target.dataset时引入工具函数 getTarget 1`] = `
 "import withWeapp, { cacheOptions, getTarget } from \\"@tarojs/with-weapp\\";
 import { Block, View, Button } from \\"@tarojs/components\\";
