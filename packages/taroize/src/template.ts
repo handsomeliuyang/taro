@@ -290,6 +290,33 @@ export function getWXMLsource (dirPath: string, src: string, type: string) {
   }
 }
 
+/**
+ * 支持import的src绝对路径转为相对路径
+ * 
+ * @param dirPath 文件目录的绝对路径
+ * @param srcPath import的src路径
+ * @returns 处理后的相对路径
+ */
+export function getSrcRelPath (dirPath: string, srcPath: string) {
+  if (srcPath.startsWith('/')) {
+    const absolutPath = resolve(setting.rootPath, srcPath.substr(1))
+    if (!fs.existsSync(absolutPath) && !fs.existsSync(`${absolutPath}.wxml`)) {
+      throw new Error(`import/include 的 src 请填入正确路径再进行转换：src="${srcPath}"`)
+    }
+    let relativePath = relative(dirPath, absolutPath)
+    relativePath = relativePath.replace(/\\/g, '/')
+    if (relativePath.indexOf('.') !== 0) {
+      srcPath = './' + relativePath
+      return srcPath
+    } else {
+      srcPath = relativePath
+      return srcPath
+    }
+  } else {
+    return srcPath
+  }
+}
+
 export function parseModule (jsx: NodePath<t.JSXElement>, dirPath: string, type: 'include' | 'import') {
   printToLogFile(`package: taroize, funName: parseModule, jsx: ${jsx}, dirPath: ${dirPath} ${getLineBreak()}`)
   const openingElement = jsx.get('openingElement')
@@ -317,20 +344,7 @@ export function parseModule (jsx: NodePath<t.JSXElement>, dirPath: string, type:
     throw new Error(`${type} 标签的 src 属性值必须是一个字符串`)
   }
   let srcValue = value.value
-  // 判断是否为绝对路径
-  if (srcValue.startsWith('/')) {
-    const absolutPath = resolve(setting.rootPath, srcValue.substr(1))
-    if (!fs.existsSync(absolutPath) && !fs.existsSync(`${absolutPath}.wxml`)) {
-      throw new Error(`import/include 的 src 请填入正确路径再进行转换：src="${srcValue}"`)
-    }
-    let relativePath = relative(dirPath, absolutPath)
-    relativePath = relativePath.replace(/\\/g, '/')
-    if (relativePath.indexOf('.') !== 0) {
-      srcValue = './' + relativePath
-    } else {
-      srcValue = relativePath
-    }
-  }
+  srcValue = getSrcRelPath(dirPath, srcValue)
   if (type === 'import') {
     const wxml = getWXMLsource(dirPath, srcValue, type)
     const { imports } = parseWXML(resolve(dirPath, srcValue), wxml, true)
