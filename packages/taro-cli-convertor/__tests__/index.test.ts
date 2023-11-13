@@ -164,4 +164,39 @@ describe('parseAst', () => {
       })
     ).toThrow()
   })
+
+  test('wx:if中使用js内置对象(如Array.isArray)时将Array视作data属性值', () => {
+    param.script = `
+      Page({
+        data: {
+          info: {
+            strArray: [1, 2, 3],
+          }
+        }
+      })
+    `
+    param.wxml = `
+      <block wx:if="{{ Array.isArray(info.strArray) && 1 > 0 }}">
+        <text>显示内容</text>
+      </block>
+    `
+    param.path = 'wx_if_isArray'
+    const taroizeResult = taroize({
+      ...param,
+      framework: 'react',
+    })
+
+    const { ast } = convert.parseAst({
+      ast: taroizeResult.ast,
+      sourceFilePath: '',
+      outputFilePath: '',
+      importStylePath: '',
+      depComponents: new Set(),
+      imports: [],
+    })
+    
+    // 将ast转换为代码
+    const jsCode = generateMinimalEscapeCode(ast)
+    expect(jsCode).toMatchSnapshot()
+  })
 })

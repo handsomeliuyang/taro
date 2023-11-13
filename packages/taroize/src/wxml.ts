@@ -8,7 +8,7 @@ import { parse } from 'himalaya-wxml'
 import { camelCase, cloneDeep } from 'lodash'
 
 import { getCacheWxml, saveCacheWxml } from './cache'
-import { reserveKeyWords } from './constant'
+import { InternalKeyWorld,reserveKeyWords  } from './constant'
 import { specialEvents } from './events'
 import { errors, globals, THIRD_PARTY_COMPONENTS, usedComponents } from './global'
 import { parseModule, parseTemplate, preParseTemplate } from './template'
@@ -350,7 +350,7 @@ export const createWxmlVistor = (
         if (!jsxExprContainer || !jsxExprContainer.isJSXExpressionContainer()) {
           return
         }
-        if (isValidVarName(path.node.name)) {
+        if (isValidVarName(path.node.name) && !InternalKeyWorld.has(path.node.name)) {
           refIds.add(path.node.name)
         }
       },

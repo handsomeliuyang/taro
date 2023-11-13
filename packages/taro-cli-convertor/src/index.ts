@@ -229,7 +229,7 @@ export default class Convertor {
       this.getSitemapLocation()
       this.getSubPackages()
     } catch (error) {
-      throw new Error(`初始化失败 ${getLineBreak()} ${error.message}`)
+      throw new Error(`初始化失败 ${getLineBreak()} ${error.stack}`)
     }
   }
 
@@ -480,15 +480,7 @@ export default class Convertor {
               const node = astPath.node
               const source = node.source
               const value = source.value
-              analyzeImportUrl(
-                self.root,
-                sourceFilePath,
-                scriptFiles,
-                source,
-                value,
-                self.isTsProject,
-                self.pluginInfo.pluginName
-              )
+              analyzeImportUrl(self.root, sourceFilePath, scriptFiles, source, value, self.isTsProject)
             },
             CallExpression (astPath) {
               printToLogFile(`package: taro-cli-convertor, 解析CallExpression: ${astPath} ${getLineBreak()}`)
@@ -510,15 +502,7 @@ export default class Convertor {
                   }
 
                   const value = args[0].value
-                  analyzeImportUrl(
-                    self.root,
-                    sourceFilePath,
-                    scriptFiles,
-                    args[0],
-                    value,
-                    self.isTsProject,
-                    self.pluginInfo.pluginName
-                  )
+                  analyzeImportUrl(self.root, sourceFilePath, scriptFiles, args[0], value, self.isTsProject)
                 } else if (WX_GLOBAL_FN.has(callee.name)) {
                   calleePath.replaceWith(t.memberExpression(t.identifier('Taro'), callee as t.Identifier))
                   needInsertImportTaro = true
@@ -1465,7 +1449,7 @@ ${code}
                 if (unResolveComponentPath.startsWith(root)) {
                   componentPath = unResolveComponentPath
                 } else {
-                  componentPath = path.join(pageConfigPath, '..', pageUsingComponents[component])
+                  componentPath = path.resolve(pageConfigPath, '..', pageUsingComponents[component])
                   // 支持将组件库放在工程根目录下
                   if (!fs.existsSync(resolveScriptPath(componentPath))) {
                     componentPath = path.join(root, pageUsingComponents[component])
@@ -1752,7 +1736,7 @@ ${code}
         // 解析入口文件信息
         const entryFilePath = pluginConfigJson.main
         if (entryFilePath) {
-          pluginInfo.entryFilePath = path.join(pluginInfo.pluginRoot, entryFilePath)
+          pluginInfo.entryFilePath = path.resolve(pluginInfo.pluginRoot, entryFilePath)
         }
       } catch (err) {
         console.log('解析plugin.json失败，请检查！')

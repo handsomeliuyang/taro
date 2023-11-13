@@ -56,4 +56,22 @@ export const reserveKeyWords = new Set([
   'transient',
 ])
 
+export const InternalKeyWorld = new Set([
+  'Array',
+  'Object',
+  'String',
+  'Number',
+  'Boolean',
+  'Function',
+  'Date',
+  'RegExp',
+  'Math',
+  'Error',
+  'JSON',
+  'Promise',
+  'Map',
+  'Symbol',
+  'Reflect',
+])
+
 export const navigateFunc = new Set(['navigateTo', 'redirectTo', 'reLaunch'])
