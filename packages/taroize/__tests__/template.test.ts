@@ -1,5 +1,6 @@
 import { globals } from '../src/global'
 import { parse } from '../src/index'
+import { getSrcRelPath } from '../src/template'
 import { parseWXML } from '../src/wxml'
 import { generateMinimalEscapeCode } from './util'
 
@@ -124,7 +125,7 @@ describe('template.ts', () => {
         expect(importsCode).toMatchSnapshot()
       })
 
-      test('import src 为绝对路径', () => {
+      test('import src 为绝对路径且文件存在', () => {
         const wxmlStr = `
           <import src="/pages/template/template"/>
           <template is="template_demo"></template>
@@ -144,6 +145,15 @@ describe('template.ts', () => {
         const importsCode = generateMinimalEscapeCode(imports[0].ast)
         expect(wxmlCode).toBe('<TemplateDemoTmpl></TemplateDemoTmpl>')
         expect(importsCode).toMatchSnapshot()
+      })
+
+      test('import src 为绝对路径但文件不存在', () => {
+    
+        jest.spyOn(path, 'resolve').mockReturnValue('E:\\code\\taro_demo\\pages\\template\\myTmpl')
+    
+        const dirPath = 'import_absoulte_path'
+        const srcValue = '/pages/template/myTmpl'
+        expect(() => getSrcRelPath(dirPath, srcValue)).toThrowError(`import/include 的 src 请填入正确路径再进行转换：src="${srcValue}"`)
       })
     })
 
