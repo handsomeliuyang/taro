@@ -5,7 +5,7 @@ import Convertor from '../src/index'
 import { copyFileToTaro } from '../src/util'
 import { clearMockFiles, getResMapFile, updateMockFiles } from './__mocks__/fs-extra.js'
 import { root } from './data/fileData'
-import { generateMinimalEscapeCode } from './util'
+import { generateMinimalEscapeCode, removeBackslashesSerializer } from './util'
 
 const path = require('path')
 
@@ -18,6 +18,8 @@ interface ITaroizeOptions {
   scriptPath?: string
   logFilePath?: string
 }
+
+expect.addSnapshotSerializer(removeBackslashesSerializer)
 
 describe('语法转换', () => {
   let convert

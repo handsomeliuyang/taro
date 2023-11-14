@@ -16,7 +16,8 @@
     "test:clear": "jest --clearCache",
     "test:cov": "jest --coverage",
     "test:updateSnapshot": "jest --updateSnapshot",
-    "test:ci": "cross-env NODE_ENV=jest jest --ci -i"
+    "test:ci": "cross-env NODE_ENV=jest jest --ci -i",
+    "t": "jest /__tests__/wxml.test.ts"
   },
   "repository": {
     "type": "git",
@@ -41,7 +42,8 @@
       "/__tests__/util.ts"
     ],
     "coveragePathIgnorePatterns": [
-      "/__tests__/*"
+      "/__tests__/*",
+      "/src/vue.ts"
     ]
   },
   "author": "yuche",

@@ -7,46 +7,70 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "CLI debug",
-      "program": "${workspaceFolder}/packages/taro-cli/bin/taro",
-      // "cwd": "${project absolute path}",
-      // "args": [
-      //   "build",
-      //   "--type",
-      //   "weapp",
-      //   "--watch"
-      // ],
+      "name": "Launch Program WxDemo",
+      "program": "${workspaceFolder}/packages/taro-cli-convertor/bin/taro-convert",
+      "cwd": "E:/code/weapp",
       "skipFiles": ["<node_internals>/**"]
     },
     {
       "type": "node",
-      "name": "vscode-jest-tests",
       "request": "launch",
-      "args": ["--runInBand"],
-      "cwd": "${workspaceFolder}",
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "disableOptimisticBPs": true,
-      "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      "name": "convertor lab",
+      "program": "${workspaceFolder}/packages/taro-cli-convertor/bin/taro-convert",
+      "cwd": "E:/code/convert-lab/miniprogram",
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
-      "program": "${workspaceFolder}/index.js",
-      "preLaunchTask": "tsc: build - tsconfig.json",
-      "outFiles": ["${workspaceFolder}/lib/**/*.js"]
+      "name": "Jest taro-cli-convertor",
+      "cwd": "${workspaceFolder}/packages/taro-cli-convertor",
+      "program": "${workspaceFolder}/packages/taro-cli-convertor/node_modules/jest/bin/jest.js",
+      // "runtimeExecutable": "${workspaceFolder}/packages/taro-cli-convertor/node_modules/.bin/jest",
+      "args": [
+        "--collectCoverage=false",
+        "--colors",
+        "-i",
+        "E:/code/taro/packages/taro-cli-convertor/__tests__/index.test.ts",
+        "-r tsconfig-paths/register",
+        "-r ts-node/register",
+        "--runInBand",
+        // "--testNamePattern", // 运行文件下的测试套或测试用例
+        "enjoy"
+        // "--testTimeout=10000000"
+      ], // 替换 <test-file-path> 为你要运行的测试文件路径
+      "internalConsoleOptions": "openOnSessionStart",
+      "console": "integratedTerminal",
+      "outputCapture": "std",
+      // "sourceMaps": true,
+      // "stopOnEntry": false,
+      "protocol": "inspector"
     },
     {
       "type": "node",
       "request": "launch",
-      "name": "E2E Test Current File",
-      "cwd": "${workspaceFolder}",
-      "program": "${workspaceFolder}/node_modules/.bin/stencil",
-      "args": ["test", "--e2e", "${relativeFile}"],
+      "name": "Jest taroize",
+      "cwd": "${workspaceFolder}/packages/taroize",
+      "program": "${workspaceFolder}/packages/taroize/node_modules/jest/bin/jest.js",
+      // "runtimeExecutable": "${workspaceFolder}/packages/taro-cli-convertor/node_modules/.bin/jest",
+      "args": [
+        "--collectCoverage=false",
+        "--colors",
+        "-i",
+        "E:/code/taro/packages/taroize/__tests__/event.test.ts",
+        "-r tsconfig-paths/register",
+        "-r ts-node/register",
+        "--runInBand",
+        // "--testNamePattern", // 运行文件下的测试套或测试用例
+        "enjoy"
+        // "--testTimeout=10000000"
+      ], // 替换 <test-file-path> 为你要运行的测试文件路径
+      "internalConsoleOptions": "openOnSessionStart",
       "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "disableOptimisticBPs": true
+      "outputCapture": "std",
+      // "sourceMaps": true,
+      // "stopOnEntry": false,
+      "protocol": "inspector"
     }
   ]
 }

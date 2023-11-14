@@ -11,8 +11,11 @@ import {
   PLUGIN_FILE_DATA,
   root,
 } from './data/fileData'
+import { removeBackslashesSerializer } from './util'
 
 const path = require('path')
+
+expect.addSnapshotSerializer(removeBackslashesSerializer)
 
 jest.mock('path')
 
