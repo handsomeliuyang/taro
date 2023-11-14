@@ -3,6 +3,14 @@ import * as t from '@babel/types'
 import { convertStyleUnit, parseContent, parseStyle, parseWXML } from '../src/wxml'
 import { generateMinimalEscapeCode } from './util'
 
+
+// 自定义序列化器函数，用于去除反斜杠
+const removeBackslashesSerializer = {
+  print: (value) => value.replace(/\\/g, ''),
+  test: (value) => typeof value === 'string',
+}
+expect.addSnapshotSerializer(removeBackslashesSerializer)
+
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'), // 保留原始的其他函数
   appendFile: jest.fn(),
