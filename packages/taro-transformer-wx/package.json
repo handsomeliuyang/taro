@@ -19,7 +19,8 @@
     "testAll": "jest",
     "dev": "tsc -w --pretty",
     "lint": "tslint",
-    "build": "tsc"
+    "build": "tsc",
+    "test:ci": "cross-env NODE_ENV=jest jest --ci -i"
   },
   "author": "O2Team",
   "license": "MIT",

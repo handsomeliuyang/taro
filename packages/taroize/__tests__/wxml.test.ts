@@ -1,7 +1,9 @@
 import * as t from '@babel/types'
 
 import { convertStyleUnit, parseContent, parseStyle, parseWXML } from '../src/wxml'
-import { generateMinimalEscapeCode } from './util'
+import { generateMinimalEscapeCode, removeBackslashesSerializer } from './util'
+
+expect.addSnapshotSerializer(removeBackslashesSerializer)
 
 jest.mock('fs', () => ({
   ...jest.requireActual('fs'), // 保留原始的其他函数
@@ -131,9 +133,7 @@ describe('wxml语法', () => {
     option.path = 'wxml_if'
     const { wxml }: any = parseWXML(option.path, option.wxml)
     const wxmlCode = generateMinimalEscapeCode(wxml)
-    expect(wxmlCode).toBe(
-      `length > 5 ? <View>1</View> : length > 2 ? <View>2</View> : <View>3</View>`
-    )
+    expect(wxmlCode).toBe(`length > 5 ? <View>1</View> : length > 2 ? <View>2</View> : <View>3</View>`)
   })
 })
 
@@ -203,7 +203,9 @@ describe('slot插槽', () => {
     option.path = 'named_wxml_slot'
     const { wxml }: any = parseWXML(option.path, option.wxml)
     const wxmlCode = generateMinimalEscapeCode(wxml)
-    expect(wxmlCode).toBe(`<View><SlotComponent renderBefore={<Block><View>这里是插入到组件slot name="before"中的内容</View></Block>} renderAfter={<Block><View>这里是插入到组件slot name="after"中的内容</View></Block>}></SlotComponent></View>`)
+    expect(wxmlCode).toBe(
+      `<View><SlotComponent renderBefore={<Block><View>这里是插入到组件slot name="before"中的内容</View></Block>} renderAfter={<Block><View>这里是插入到组件slot name="after"中的内容</View></Block>}></SlotComponent></View>`
+    )
   })
 })
 
@@ -252,7 +254,7 @@ describe('wxs', () => {
     const wxmlCode = generateMinimalEscapeCode(wxml)
     const importsCode = generateMinimalEscapeCode(imports[0].ast)
     expect(wxmlCode).toBe('<Block><View>Hello Word!</View><View>{wxs_demo.data}</View></Block>')
-    expect(wxses[0]).toEqual({ module: 'wxs_demo',src: './wxs__wxs_demo' })
+    expect(wxses[0]).toEqual({ module: 'wxs_demo', src: './wxs__wxs_demo' })
     expect(importsCode).toMatchSnapshot()
   })
 
@@ -317,7 +319,7 @@ describe('wxs', () => {
     option.path = 'wxml_wxs_regexp'
     const { wxses, imports }: any = parseWXML(option.path, option.wxml)
     const importsCode = generateMinimalEscapeCode(imports[0].ast)
-    expect(wxses).toMatchSnapshot()
+    expect(wxses[0]).toEqual({ module: 'wxs_regexp', src: './wxs__wxs_regexp' })
     expect(importsCode).toBe('var regexp = new RegExp();')
   })
 
@@ -336,42 +338,41 @@ describe('wxs', () => {
     option.path = 'wxml_wxs_getDate'
     const { wxses, imports }: any = parseWXML(option.path, option.wxml)
     const importsCode = generateMinimalEscapeCode(imports[0].ast)
-    expect(wxses).toMatchSnapshot()
+    expect(wxses[0]).toEqual({ module: 'wxs_getDate', src: './wxs__wxs_getDate' })
     expect(importsCode).toMatchSnapshot()
   })
 })
 
 describe('解析wxs中创建正则表达式方法的转换', () => {
-
   test('定义了正则表达式的修饰符,则使用自定义修饰符', () => {
     option.wxml = `
-    <wxs module="xxxfile">
-      var a = getRegExp('jzy123','img')
-      module.exports = {
-        reg: a
-      }
-    </wxs>
+      <wxs module="xxxfile">
+        var a = getRegExp('jzy123','img')
+        module.exports = {
+          reg: a
+        }
+      </wxs>
     `
     option.path = 'wxml_wxs_reg1'
     const { wxses, imports }: any = parseWXML(option.path, option.wxml)
     const importsCode = generateMinimalEscapeCode(imports[0].ast)
-    expect(wxses).toMatchSnapshot()
+    expect(wxses[0]).toEqual({ module: 'xxxfile',src: './wxs__xxxfile' })
     expect(importsCode).toMatchSnapshot()
   })
 
   test('没有定义了正则表达式的修饰符,就不添加修饰符使用默认', () => {
     option.wxml = `
-    <wxs module="xxxfile">
-      var a = getRegExp('jzy123')
-      module.exports = {
-        reg: a
-      }
-    </wxs>
+      <wxs module="xxxfile">
+        var a = getRegExp('jzy123')
+        module.exports = {
+          reg: a
+        }
+      </wxs>
     `
     option.path = 'wxml_wxs_reg2'
     const { wxses, imports }: any = parseWXML(option.path, option.wxml)
     const importsCode = generateMinimalEscapeCode(imports[0].ast)
-    expect(wxses).toMatchSnapshot()
+    expect(wxses[0]).toEqual({ module: 'xxxfile',src: './wxs__xxxfile' })
     expect(importsCode).toMatchSnapshot()
   })
 })
