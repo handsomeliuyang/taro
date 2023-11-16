@@ -339,11 +339,8 @@ describe('wxs', () => {
     expect(wxses).toMatchSnapshot()
     expect(importsCode).toMatchSnapshot()
   })
-})
 
-describe('解析wxs中创建正则表达式方法的转换', () => {
-
-  test('定义了正则表达式的修饰符,则使用自定义修饰符', () => {
+  test('wxs中定义了正则表达式时使用自定义修饰符', () => {
     option.wxml = `
     <wxs module="xxxfile">
       var a = getRegExp('jzy123','img')
@@ -359,7 +356,7 @@ describe('解析wxs中创建正则表达式方法的转换', () => {
     expect(importsCode).toMatchSnapshot()
   })
 
-  test('没有定义了正则表达式的修饰符,就不添加修饰符使用默认', () => {
+  test('wxs中定义了正则表达式时不使用自定义修饰符', () => {
     option.wxml = `
     <wxs module="xxxfile">
       var a = getRegExp('jzy123')

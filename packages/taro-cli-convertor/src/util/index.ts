@@ -34,7 +34,7 @@ export function getPkgVersion (): string {
 }
 
 // 文件存在或添加后缀.js、.jsx、.ts、.tsx存在则返回文件路径，否则返回null
-function revertScriptPath (absolutePath: string, SCRIPT_EXT: string[]) {
+export function revertScriptPath (absolutePath: string, SCRIPT_EXT: string[]) {
   for (const item of SCRIPT_EXT) {
     if (fs.existsSync(absolutePath)) {
       return absolutePath
@@ -45,13 +45,13 @@ function revertScriptPath (absolutePath: string, SCRIPT_EXT: string[]) {
   return null
 }
 
-function getRelativePath (_rootPath: string, sourceFilePath: string, oriPath: string) {
+export function getRelativePath (_rootPath: string, sourceFilePath: string, oriPath: string) {
   // 处理以/开头的绝对路径，比如 /a/b
   if (path.isAbsolute(oriPath)) {
     if (oriPath.indexOf('/') !== 0) {
       return ''
     }
-    const absolutePath = revertScriptPath(path.resolve(sourceFilePath, '..' + oriPath), SCRIPT_EXT)
+    const absolutePath = revertScriptPath(path.join(sourceFilePath, '..' + oriPath), SCRIPT_EXT)
     if (absolutePath == null) {
       return ''
     }
@@ -65,7 +65,7 @@ function getRelativePath (_rootPath: string, sourceFilePath: string, oriPath: st
   }
   // 处理非正常路径，比如 a/b
   if (oriPath.indexOf('.') !== 0) {
-    const absolutePath = revertScriptPath(path.resolve(sourceFilePath, '..', oriPath), SCRIPT_EXT)
+    const absolutePath = revertScriptPath(path.join(sourceFilePath, '..', oriPath), SCRIPT_EXT)
 
     // 可能为三方库
     if (absolutePath == null) {
