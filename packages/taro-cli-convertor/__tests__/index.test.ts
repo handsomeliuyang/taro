@@ -1,6 +1,14 @@
+import { SCRIPT_EXT } from '@tarojs/helper'
 import * as taroize from '@tarojs/taroize'
 
 import Convertor from '../src/index'
+import { getRelativePath, revertScriptPath } from '../src/util'
+import { setMockFiles,updateMockFiles } from './__mocks__/fs-extra'
+import {
+  DEMO_JS_FILE_INFO,
+  DEMO_JS_FILE_INFO_IMPORT,
+  root,
+} from './data/fileData'
 import { generateMinimalEscapeCode } from './util'
 
 jest.mock('fs', () => ({
@@ -346,5 +354,59 @@ describe('parseAst', () => {
     // 将ast转换为代码
     const jsCode = generateMinimalEscapeCode(ast)
     expect(jsCode).toMatchSnapshot()
+  })
+})
+describe('测试小程序的js文件中不同形式导入文件且不加js后缀', () => {
+
+  // 还原模拟函数
+  afterEach(() => {
+    jest.restoreAllMocks()
+  })
+
+  // 创建模拟文件结构
+  setMockFiles(root, DEMO_JS_FILE_INFO)
+  updateMockFiles(root, DEMO_JS_FILE_INFO_IMPORT)
+
+  const rootPath = ''
+  // 当前解析文件路径
+  const sourceFilePath = '\\wxProject\\pages\\index\\index.js'
+
+  test('导入形式: ../a', () => {
+
+    // 小程序导入文件路径
+    const filePath = '../test'
+    const oriPath = getRelativePath(rootPath, sourceFilePath, filePath)
+    expect(oriPath).toBe('../test')
+  })
+
+  test('导入形式: ./a', () => {
+
+    // 小程序导入文件路径
+    const filePath = './test'
+    const oriPath = getRelativePath(rootPath, sourceFilePath, filePath)
+    expect(oriPath).toBe('./test')
+  })
+
+  test('导入形式: a/b, 文件不是三方件', () => {
+
+    // 模拟导入文件绝对路径
+    const absolutePath = '\\wxProject\\pages\\index\\test'
+
+    // 小程序导入文件路径
+    const filePath = 'test'
+
+    const revertPath = revertScriptPath(absolutePath, SCRIPT_EXT)
+    expect(revertPath).toBe('\\wxProject\\pages\\index\\test.js')
+
+    const oriPath = getRelativePath(rootPath, sourceFilePath, filePath)
+    expect(oriPath).toBe('./test.js')
+  })
+
+  test('导入形式: a/b, 文件是三方件', () => {
+
+    // 小程序导入文件路径
+    const filePath = 'lodash'
+    const oriPath = getRelativePath(rootPath, sourceFilePath, filePath)
+    expect(oriPath).toBe('lodash')
   })
 })
