@@ -1009,6 +1009,12 @@ importers:
       fs-extra:
         specifier: ^8.0.1
         version: registry.npmjs.org/fs-extra@8.1.0
+      mem-fs:
+        specifier: ^2.3.0
+        version: registry.npmjs.org/mem-fs@2.3.0
+      mem-fs-editor:
+        specifier: ^9.6.0
+        version: registry.npmjs.org/mem-fs-editor@9.7.0(mem-fs@2.3.0)
       postcss:
         specifier: ^8.4.18
         version: registry.npmjs.org/postcss@8.4.23

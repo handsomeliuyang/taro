@@ -28,3 +28,9 @@ export function generateMinimalEscapeCode (ast: t.File) {
     },
   }).code
 }
+
+// 自定义序列化器函数，用于去除快照中的反斜杠
+export const removeBackslashesSerializer = {
+  test: (value) => typeof value === 'string',
+  print: (value) => value.replace(/\\/g, '')
+}
