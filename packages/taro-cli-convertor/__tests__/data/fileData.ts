@@ -264,3 +264,32 @@ export const PLUGIN_FILE_DATA = {
     <text>这是插件组件component1</text>
   `,
 }
+
+// 小程序demo， 含有文件导入导出
+export const DEMO_JS_FILE_INFO_IMPORT = {
+  '/pages/index/index.js': `
+    const app = getApp()
+    import { addNum } from 'test'
+    const msg = require('test')
+      Page({
+      data: {
+        info: msg.addNum,
+        info2: addNum
+      },
+      onLoad() {}
+    })
+  `,
+  '/pages/index/index.wxml': `
+    <view>{{ info }}</view>
+    <view>{{ info2 }}</view>
+  `,
+  '/pages/index/test.js': `
+    let a = 11
+    function addNum() {
+      return a + 11
+    }
+    module.exports = {
+      addNum: addNum()
+    }
+  `,
+}
