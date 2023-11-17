@@ -24,28 +24,28 @@ export const getDeviceVoIPList = /* @__PURE__ */ temporarilyNotSupport('getDevic
 /**
  * 模拟隐私接口调用，并触发隐私弹窗逻辑
  * 
- * @canUse requirePrivacyAuthorize
+ * @canNotUse requirePrivacyAuthorize
  */
 export const requirePrivacyAuthorize = /* @__PURE__ */ temporarilyNotSupport('requirePrivacyAuthorize')
 
 /**
  * 跳转至隐私协议页面
  * 
- * @canUse openPrivacyContract
+ * @canNotUse openPrivacyContract
  */
 export const openPrivacyContract = /* @__PURE__ */ temporarilyNotSupport('openPrivacyContract')
 
 /**
  * 监听隐私接口需要用户授权事件。
  * 
- * @canUse onNeedPrivacyAuthorization
+ * @canNotUse onNeedPrivacyAuthorization
  */
 export const onNeedPrivacyAuthorization = /* @__PURE__ */ temporarilyNotSupport('onNeedPrivacyAuthorization')
 
 /**
  * 查询隐私授权情况。
  * 
- * @canUse getPrivacySetting
+ * @canNotUse getPrivacySetting
  */
 export const getPrivacySetting = /* @__PURE__ */ temporarilyNotSupport('getPrivacySetting')
 
