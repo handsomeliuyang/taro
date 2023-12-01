@@ -1,4 +1,5 @@
 import { codeFrameColumns } from '@babel/code-frame'
+import generate from '@babel/generator'
 import { parse } from '@babel/parser'
 import { default as template } from '@babel/template'
 import traverse, { NodePath } from '@babel/traverse'
@@ -51,35 +52,47 @@ export function isValidVarName (str?: string) {
 export function parseCode (code: string, scriptPath?: string) {
   printToLogFile(`package: taroize, funName: parseCode, scriptPath: ${scriptPath} ${getLineBreak()}`)
   let ast: any = {}
-  if (typeof scriptPath !== 'undefined') {
-    ast = parse(code, {
-      sourceFilename: scriptPath,
-      sourceType: 'module',
-      plugins: [
-        'jsx',
-        'flow',
-        'decorators-legacy',
-        ['optionalChainingAssign', { version: '2023-07' }],
-        'sourcePhaseImports',
-        'throwExpressions',
-        'deferredImportEvaluation',
-        'exportDefaultFrom'
-      ],
-    })
-  } else {
-    ast = parse(code, {
-      sourceType: 'module',
-      plugins: [
-        'jsx',
-        'flow',
-        'decorators-legacy',
-        ['optionalChainingAssign', { version: '2023-07' }],
-        'sourcePhaseImports',
-        'throwExpressions',
-        'deferredImportEvaluation',
-        'exportDefaultFrom'
-      ],
-    })
+  try {
+    if (typeof scriptPath !== 'undefined') {
+      ast = parse(code, {
+        sourceFilename: scriptPath,
+        sourceType: 'module',
+        plugins: [
+          'jsx',
+          'flow',
+          'decorators-legacy',
+          ['optionalChainingAssign', { version: '2023-07' }],
+          'sourcePhaseImports',
+          'throwExpressions',
+          'deferredImportEvaluation',
+          'exportDefaultFrom'
+        ],
+      })
+    } else {
+      ast = parse(code, {
+        sourceType: 'module',
+        plugins: [
+          'jsx',
+          'flow',
+          'decorators-legacy',
+          ['optionalChainingAssign', { version: '2023-07' }],
+          'sourcePhaseImports',
+          'throwExpressions',
+          'deferredImportEvaluation',
+          'exportDefaultFrom'
+        ],
+      })
+    }
+  } catch (error) {
+    // 结尾注释会引起 parseCode 报错，因此收录到报告中
+    if (error.message.includes('Unterminated comment')) {
+      throw new  IReportError(
+        'WXML代码解析失败, 代码中存在不完整的注释',
+        'UnterminatedComment',
+        'WXML_FILE',
+        ''
+      )
+    }
   }
   // 移除Flow类型注释
   traverse(ast, {
@@ -106,7 +119,12 @@ export const buildTemplate = (str: string) => {
   if (t.isExpressionStatement(ast)) {
     return ast.expression
   } else {
-    throw new Error(`Invalid AST. Expected an ExpressionStatement`)
+    throw new IReportError(
+      `Invalid AST. Expected an ExpressionStatement`,
+      'InvalidASTError',
+      'WXML_FILE',
+      str
+    )
   }
 }
 
@@ -331,6 +349,77 @@ export function printToLogFile (data: string) {
     fs.appendFile(globals.logFilePath, data)
   } catch (error) {
     console.error('写日志文件异常')
-    throw error
+    throw new IReportError(
+      '写日志文件异常',
+      'WriteLogException',
+      globals.logFilePath
+    )
+  }
+}
+
+/**
+ * 将部分 ast 节点转为代码片段
+ * @param ast 
+ * @returns 
+ */
+export function astToCode (ast) {
+  if (!ast) return ''
+  try {
+    return generate(ast).code
+  } catch (err) {
+    //
+  }
+}
+
+/**
+ * 创建 errorCodeMsg 对象
+ * @param msgType 错误类型
+ * @param describe 错误描述
+ * @param code 错误代码
+ * @param filePath 错误信息所在文件路径
+ * @returns 
+ */
+export function crateErrorCodeMsg (msgType: string, describe: string, code: string, filePath: string) {
+  const errorCodeMst = {
+    msgType,
+    describe,
+    codeBeforeConvert: {
+      filePath,
+      code,
+      location: { start: { col: 0, row: 0 } }
+    }
+  }
+  return errorCodeMst
+}
+
+/**
+ *  拓展原生 Error 属性
+ */
+export class IReportError extends Error {
+
+  // 错误信息类型
+  msgType: string
+
+  // 错误信息路径
+  filePath: string | 'JS_FILE' | 'WXML_FILE'
+
+  // 错误代码
+  code: string
+
+  // 错误代码位置信息
+  location: { col: number, row: number } | undefined
+
+  constructor (
+    message: string,
+    msgType?: string, 
+    filePath?: string | 'JS_FILE' | 'WXML_FILE',
+    code?: string,
+    location?: { col: number, row: number } | undefined
+  ) {
+    super(message)
+    this.msgType = msgType || ''
+    this.filePath = filePath || ''
+    this.code = code || ''
+    this.location = location
   }
 }

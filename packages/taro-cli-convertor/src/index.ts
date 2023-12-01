@@ -28,6 +28,8 @@ import * as prettier from 'prettier'
 
 import {
   analyzeImportUrl,
+  astToCode,
+  computeProjectFileNums,
   copyFileToTaro,
   DEFAULT_Component_SET,
   generateDir,
@@ -39,6 +41,11 @@ import {
   handleThirdPartyLib,
   handleUnconvertDir,
   incrementId,
+  IReportData,
+  IReportError,
+  parseError,
+  parseProjectName,
+  paseGlobalErrMsgs,
   printToLogFile,
   replacePluginComponentUrl,
   transRelToAbsPath,
@@ -114,13 +121,6 @@ interface IConvertConfig {
   nodePath: string[] // 搜索三方库的目录
 }
 
-interface IReportMsg {
-  filePath: string // 报告信息所在文件路径
-  message: string // 报告信息
-  type?: string // 报告信息类型
-  childReportMsg?: IReportMsg[]
-}
-
 interface IProjectConfig {
   pluginRoot: string
   compileType: string
@@ -182,7 +182,6 @@ export default class Convertor {
   miniprogramRoot: string
   convertConfig: IConvertConfig
   external: string[]
-  reportErroMsg: IReportMsg[]
   projectConfig: IProjectConfig
   pluginInfo: IPluginInfo
   isTraversePlugin: boolean
@@ -207,7 +206,6 @@ export default class Convertor {
     this.hadBeenCopyedFiles = new Set<string>()
     this.hadBeenBuiltComponents = new Set<string>()
     this.hadBeenBuiltImports = new Set<string>()
-    this.reportErroMsg = []
     this.projectConfig = { pluginRoot: '', compileType: '' }
     this.pluginInfo = {
       pluginRoot: '',
@@ -513,8 +511,12 @@ export default class Convertor {
                   }
 
                   if (!t.isStringLiteral(args[0])) {
-                    // require 暂不支持动态导入，如require('aa' + aa)，后续收录到报告中
-                    throw new Error(`require暂不支持动态导入, filePath: ${sourceFilePath}, context: ${astPath}`)
+                    throw new IReportError(
+                      `require暂不支持动态导入, filePath: ${sourceFilePath}, context: ${astPath}`,
+                      'DynamicImportNotSupportedError',
+                      sourceFilePath,
+                      astToCode(astPath.node) || ''
+                    )
                   }
 
                   const value = args[0].value
@@ -1046,7 +1048,11 @@ export default class Convertor {
           this.root = path.join(this.root, projectConfigJson.miniprogramRoot.replace(/\/+$/, ''))
         }
       } catch (err) {
-        throw new Error(`project.config${this.fileTypes.CONFIG} 解析失败，请检查！`)
+        throw new IReportError(
+          `project.config${this.fileTypes.CONFIG} 解析失败，请检查！`, 
+          'ProjectConfigParsingError', 
+          projectConfigFilePath
+        )
       }
     }
   }
@@ -1197,7 +1203,8 @@ export default class Convertor {
           this.hadBeenCopyedFiles.add(file)
           this.generateScriptFiles(scriptFiles)
         } catch (error) {
-          console.log(`转换文件${file}异常，errorMessage:${error}`)
+          parseError(error, file, '')
+          console.log(`转换JS文件${file}异常 ${error}`)
         }
       })
     }
@@ -1307,7 +1314,8 @@ ${code}
         this.generateCustomTabbar(this.entryJSON.tabBar)
       }
     } catch (err) {
-      console.log(err)
+      console.log(`入口文件解析失败 ${err.message}`)
+      parseError(err, this.entryJSPath, '')
     }
   }
 
@@ -1438,7 +1446,11 @@ ${code}
 
       try {
         if (!fs.existsSync(pageJSPath)) {
-          throw new Error(`页面 ${page} 没有 JS 文件！`)
+          throw new IReportError(
+            `页面 ${page} 没有 JS 文件！`,
+            'MissingJSFileError',
+            pagePath
+          )
         }
         const param: ITaroizeOptions = {}
         printLog(processTypeEnum.CONVERT, '页面文件', this.generateShowPath(pageJSPath))
@@ -1542,8 +1554,9 @@ ${code}
         this.traverseComponents(depComponents)
       } catch (err) {
         printLog(processTypeEnum.ERROR, '页面转换', this.generateShowPath(pageJSPath))
-        console.log(err)
         printToLogFile(`package: taro-cli-convertor, 转换页面异常 ${err.stack} ${getLineBreak()}`)
+        parseError(err, pageJSPath, pageTemplPath)
+        // console.log(`页面转换失败 ${err.message}`)
       }
     })
   }
@@ -1568,7 +1581,11 @@ ${code}
         const param: ITaroizeOptions = {}
         const depComponents = new Set<IComponent>()
         if (!fs.existsSync(componentJSPath)) {
-          throw new Error(`自定义组件 ${component} 没有 JS 文件！`)
+          throw new IReportError(
+            `自定义组件 ${component} 没有 JS 文件！`,
+            'MissingJSFileError',
+            component
+          )
         }
         printLog(processTypeEnum.CONVERT, '组件文件', this.generateShowPath(componentJSPath))
         if (fs.existsSync(componentConfigPath)) {
@@ -1636,7 +1653,8 @@ ${code}
         this.traverseComponents(depComponents)
       } catch (err) {
         printLog(processTypeEnum.ERROR, '组件转换', this.generateShowPath(componentJSPath))
-        console.log(err)
+        parseError(err, componentJSPath, componentTemplPath)
+        console.log(`组件转换失败 ${err.message}`)
         printToLogFile(`package: taro-cli-convertor, 转换组件异常 ${err.stack} ${getLineBreak()}`)
       }
     })
@@ -1862,9 +1880,21 @@ ${code}
     const reportDir = path.join(this.convertRoot, 'report')
     const reportBundleFilePath = path.resolve(__dirname, '../', 'report/bundle.js')
     const reportIndexFilePath = path.resolve(__dirname, '../', 'report/report.html')
+    const errMsgList = paseGlobalErrMsgs(globals.errCodeMsgs)
+    const reportData: IReportData = {
+      projectName: parseProjectName(this.root),
+      projectPath: this.root,
+      pageNums: this.pages.size,
+      fileNums: computeProjectFileNums(this.root),  
+      errMsgList: errMsgList
+    }
 
-    generateReportFile(reportBundleFilePath, reportDir, 'bundle.js', this.reportErroMsg)
-    generateReportFile(reportIndexFilePath, reportDir, 'report.html')
+    try {
+      generateReportFile(reportBundleFilePath, reportDir, 'bundle.js', reportData)
+      generateReportFile(reportIndexFilePath, reportDir, 'report.html')
+    } catch (error) {
+      console.log(`报告生成失败 ${error.message}`)
+    }
   }
 
   showLog () {

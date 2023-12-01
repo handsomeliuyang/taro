@@ -6,6 +6,7 @@ export const globals = {
   rootPath: '',
   hasCatchTrue: false,
   logFilePath: '',
+  currentParseFile: '',
 }
 
 export const THIRD_PARTY_COMPONENTS = new Set<string>()

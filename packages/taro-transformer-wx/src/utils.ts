@@ -769,3 +769,49 @@ export function printToLogFile(data: string) {
     throw error
   }
 }
+
+/**
+ * 将部分 ast 节点转为代码片段
+ * @param ast 
+ * @returns 
+ */
+export function astToCode (ast) {
+  if (!ast) return ''
+  try {
+    return generate(ast).code
+  } catch (err) {
+    //
+  }
+}
+
+/**
+ *  拓展原生 Error 属性
+ */
+export class IReportError extends Error {
+
+  // 错误信息类型
+  msgType: string
+
+  // 错误信息路径
+  filePath: string | 'JS_FILE' | 'WXML_FILE'
+
+  // 错误代码
+  code: string
+
+  // 错误代码位置信息
+  location: { col: number, row: number } | undefined
+
+  constructor (
+    message: string,
+    msgType?: string, 
+    filePath?: string | 'JS_FILE' | 'WXML_FILE',
+    code?: string,
+    location?: { col: number, row: number } | undefined
+  ) {
+    super(message)
+    this.msgType = msgType || ''
+    this.filePath = filePath || ''
+    this.code = code || ''
+    this.location = location
+  }
+}

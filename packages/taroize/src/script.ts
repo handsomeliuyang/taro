@@ -2,7 +2,7 @@ import traverse, { NodePath, Visitor } from '@babel/traverse'
 import * as t from '@babel/types'
 
 import { navigateFunc } from './constant'
-import { usedComponents } from './global'
+import { globals, usedComponents } from './global'
 import {
   buildBlockElement,
   buildImportStatement,
@@ -100,6 +100,7 @@ export function parseScript (
   isApp = false,
   pluginInfo?
 ) {
+  globals.currentParseFile = scriptPath || ''
   printToLogFile(`package: taroize, funName: parseScript, scriptPath: ${scriptPath} ${getLineBreak()}`)
   script = script || 'Page({})'
   if (t.isJSXText(returned as any)) {

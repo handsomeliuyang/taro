@@ -1,3 +1,4 @@
+import generate from '@babel/generator'
 import {
   chalk,
   CSS_IMPORT_REG,
@@ -18,11 +19,49 @@ import type * as t from '@babel/types'
 
 const NODE_MODULES = 'node_modules'
 
-interface IReportMsg {
-  filePath: string // 报告信息文件路径
-  message: string // 报告信息
-  type?: string // 报告信息类型
-  childReportMsg?: IReportMsg[]
+/* 转换报告信息 */
+export interface IReportData {
+  projectName: string // 工程名称
+  projectPath: string	// 工程路径
+  pageNums: number	// 页面数
+  fileNums: number 	// 文件数
+  errMsgList: Array<ErrMsgs>	// 异常信息列表
+}
+
+/* 单个错误信息 */
+export interface ErrMsgs {
+  filePath: string	// 文件路径
+  msgType: string   // 异常类型
+  mesDescribe: string // 信息描述
+  errCodeList: Array<ErrCodeMsg>	// 异常代码信息列表
+}
+
+/* 单个错误的代码信息 */
+export interface ErrCodeMsg {
+  msgType: string       // 错误类型
+  describe: string   // 信息描述
+  codeBeforeConvert?: {  // 转换之前的异常代码信息
+    filePath: string	  // 异常文件路径
+    code: string		    // 异常代码
+    location: Location	// 异常代码位置
+  }
+  codeAfterConvert?: {   // 转换之后的异常代码信息
+    filePath: string	  // 异常文件路径
+    code: string		    // 异常代码
+    location: Location	// 异常代码位置
+  }
+}
+
+/* 代码位置 */
+export interface Location {
+  start: {	// 开始位置
+    col: number	// 列
+    row: number	// 行
+  }
+  end?: {		// 结束位置
+    col: number	// 列
+    row: number	// 行
+  }
 }
 
 export function getRootPath (): string {
@@ -338,9 +377,9 @@ export function getWxssImports (content: string) {
  * @param { string } sourceFilePath 源文件路径
  * @param { string } targeFileDir 转换后文件所在目录
  * @param { string } targeFileName 转换后文件名
- * @param { IReportMsg[] } reportErroMsg 报错信息
+ * @param { IReportData } reportErroMsg 报错信息
  */
-export function generateReportFile (sourceFilePath, targeFileDir, targeFileName, reportErroMsg?: IReportMsg[]) {
+export function generateReportFile (sourceFilePath, targeFileDir, targeFileName, reportErroMsg?: IReportData) {
   try {
     if (!fs.existsSync(targeFileDir)) {
       fs.mkdirSync(targeFileDir)
@@ -351,7 +390,7 @@ export function generateReportFile (sourceFilePath, targeFileDir, targeFileName,
     }
     fs.writeFileSync(path.join(targeFileDir, targeFileName), data)
   } catch (error) {
-    console.log(`文件${sourceFilePath}写入失败，errorMsg：${error}`)
+    throw new Error(`文件${sourceFilePath}写入失败，errorMsg：${error}`)
   }
 }
 
@@ -393,7 +432,11 @@ export function printToLogFile (data: string) {
     fs.appendFile(globals.logFilePath, data)
   } catch (error) {
     console.log('写日志文件异常')
-    throw error
+    throw new IReportError(
+      '写日志文件异常',
+      'WriteLogException',
+      globals.logFilePath
+    )
   }
 }
 
@@ -403,18 +446,18 @@ export function printToLogFile (data: string) {
  * @param pluginComponentPath 小程序中引用的插件路径
  * @param pluginInfo 插件信息
  * @returns
- */
+ */  
 export function replacePluginComponentUrl (pluginComponentPath, pluginInfo) {
   // 捕获跳转路径中的插件名和页面名，替换为子包路径
   const regexPluginUrl = /plugin:\/\/([^/]+)\/([^/?]+)/
   const matchPluginUrl = pluginComponentPath.match(regexPluginUrl)
-  if (!matchPluginUrl) {
+  if (!matchPluginUrl) {      
     // 后续添加到转换报告中，不使用throw，不阻塞转换
     throw new Error(`引用插件路径格式异常，插件路径：${pluginComponentPath}`)
   }
 
   // 捕获页面名
-  const componentName = matchPluginUrl[2]
+  const componentName = matchPluginUrl[2]  
 
   // 通过引用的插件组件名在注册的插件组件信息中查找组件路径
   let componentPath = null
@@ -430,6 +473,190 @@ export function replacePluginComponentUrl (pluginComponentPath, pluginInfo) {
   }
 
   return componentPath
+}
+
+/**
+ * 将部分 ast 节点转为代码片段
+ * @param ast 
+ * @returns 
+ */
+export function astToCode (ast) {
+  if (!ast) return ''
+  try {
+    return generate(ast).code
+  } catch (err) {
+    //
+  }
+}
+
+/**
+ * 解析项目名称
+ * @param projectPath 项目路径 
+ * @returns { string } 项目名称
+ */
+export function parseProjectName (projectPath: string): string {
+  if (!projectPath) return ''
+  const projectPathInfo = path.parse(projectPath)
+  if (projectPathInfo.name === 'miniprogram') {
+    return path.parse(projectPathInfo.dir).name
+  } else {
+    return projectPathInfo.name
+  }
+}
+
+/**
+ *  统计工程目录下文件数量
+ * @param projectPath 
+ * @returns 
+ */
+export function computeProjectFileNums (projectPath: string): number {
+  let count = 0
+  if (!projectPath) return count
+  const files = fs.readdirSync(projectPath)
+  files.forEach((file) => {
+    if (file !== 'taroConvert') {
+      const filePath = path.join(projectPath, file)
+      const stats = fs.statSync(filePath)
+      if (stats.isFile()) {
+        // 如果是文件，则增加计数
+        count++
+      } else if (stats.isDirectory()) {
+        // 如果是目录，则递归统计子目录中的文件
+        count += computeProjectFileNums(filePath)
+      }
+    }
+  })
+  return count
+}
+
+/**
+ * 通过错误代码信息的 msgType、filePath 在 errMsgs 中寻找对应 errMsg
+ * @param msgType  
+ * @param filePath 
+ * @param errMsgList 
+ */
+function findErrMsg (msgType: string, filePath: string, errMsgList: ErrMsgs[]): undefined | ErrMsgs {
+  return errMsgList.find((errMsg) => {
+    return errMsg.msgType === msgType && errMsg.filePath === filePath
+  })
+}
+
+/**
+ * 判断 errCodeMsg 是否包含 code 代码
+ * @param errCodeMsg 错误信息代码
+ * @returns 
+ */
+function hasCode (errCodeMsg: ErrCodeMsg): boolean {
+  return !!errCodeMsg.codeBeforeConvert?.code
+}
+
+/**
+ * 将 errCodeMsgs 分类，生成 errMsgs 列表
+ * @param errCodeMsgs 错误代码信息
+ */
+export function paseGlobalErrMsgs (errCodeMsgs: ErrCodeMsg[]): ErrMsgs[] {
+  const errMsgList: ErrMsgs[] = []
+  errCodeMsgs.forEach((errCodeMsg: ErrCodeMsg  ) => {
+    const msgType = errCodeMsg.msgType
+    const filePath = errCodeMsg.codeBeforeConvert?.filePath
+    if (msgType && filePath) {
+      const errMsgs = findErrMsg(msgType, filePath, errMsgList)
+      if (errMsgs) {
+        if (hasCode(errCodeMsg)) {
+          errMsgs.errCodeList.push(errCodeMsg)
+        }
+      } else {
+        errMsgList.push({ 
+          filePath, 
+          msgType, 
+          errCodeList: [errCodeMsg], 
+          mesDescribe: hasCode(errCodeMsg) ? '' : errCodeMsg.describe 
+        })
+      }
+    }
+  })
+
+  return errMsgList
+}
+
+/**
+ * 解析 catch 捕获的错误信息
+ * @param { IReportError } errMsg 捕获的错误对象
+ * @param { string } jsPath  js文件路径
+ * @param { string } wxmlPath wxml文件路径
+ */
+export function parseError (errMsg: IReportError, jsPath: string, wxmlPath: string) {
+  const filePathMap = new Map([
+    ['WXML_FILE', wxmlPath],
+    ['JS_FILE', jsPath]
+  ])
+  if (errMsg.msgType) {
+    const currentFilePath = filePathMap.get(errMsg.filePath) || errMsg.filePath
+    const errCodeMsg: ErrCodeMsg = {
+      msgType: errMsg.msgType,
+      describe: errMsg.message,
+      codeBeforeConvert: {
+        filePath: currentFilePath,
+        code: errMsg.code,
+        location: { start: { col: 0, row: 0 } }
+      }
+    }
+    globals.errCodeMsgs.push(errCodeMsg)
+  }
+}
+
+/**
+ * 创建 errorCodeMsg 对象
+ * @param msgType 错误类型
+ * @param describe 错误描述
+ * @param code 错误代码
+ * @param filePath 错误信息所在文件路径
+ * @returns 
+ */
+export function crateErrorCodeMsg (msgType: string, describe: string, code: string, filePath: string) {
+  const errorCodeMst = {
+    msgType,
+    describe,
+    codeBeforeConvert: {
+      filePath,
+      code,
+      location: { start: { col: 0, row: 0 } }
+    }
+  }
+  return errorCodeMst
+}
+
+/**
+ *  拓展原生 Error 属性
+ */
+export class IReportError extends Error {
+
+  // 错误信息类型
+  msgType: string
+
+  // 错误信息路径
+  filePath: string | 'JS_FILE' | 'WXML_FILE'
+
+  // 错误代码
+  code: string
+
+  // 错误代码位置信息
+  location: { col: number, row: number } | undefined
+
+  constructor (
+    message: string,
+    msgType?: string, 
+    filePath?: string | 'JS_FILE' | 'WXML_FILE',
+    code?: string,
+    location?: { col: number, row: number } | undefined
+  ) {
+    super(message)
+    this.msgType = msgType || ''
+    this.filePath = filePath || ''
+    this.code = code || ''
+    this.location = location
+
+  }
 }
 
 // eslint-disable-next-line camelcase

@@ -201,26 +201,30 @@ export type TransformOptions = Options
 
 function parseCode (code: string) {
   printToLogFile(`package: taro-transformer-wx, funName: parseCode ${getLineBreak()}`)
-  const ast: any = parse(code, {
-    sourceType: 'module',
-    plugins: [
-      'jsx',
-      'flow',
-      'decorators-legacy',
-      ['optionalChainingAssign', { version: '2023-07' }],
-      'sourcePhaseImports',
-      'throwExpressions',
-      'deferredImportEvaluation',
-      'exportDefaultFrom'
-    ],
-  })
-  // 移除Flow类型注释
-  traverse(ast, {
-    TypeAnnotation (path) {
-      path.remove()
-    },
-  })
-  return ast
+  try {
+    const ast: any = parse(code, {
+      sourceType: 'module',
+      plugins: [
+        'jsx',
+        'flow',
+        'decorators-legacy',
+        ['optionalChainingAssign', { version: '2023-07' }],
+        'sourcePhaseImports',
+        'throwExpressions',
+        'deferredImportEvaluation',
+        'exportDefaultFrom'
+      ],
+    })
+    // 移除Flow类型注释
+    traverse(ast, {
+      TypeAnnotation (path) {
+        path.remove()
+      },
+    })
+    return ast
+  } catch (error) {
+    
+  }
 }
 
 export default function transform(options: TransformOptions): TransformResult {
