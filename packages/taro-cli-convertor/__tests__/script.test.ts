@@ -1,5 +1,6 @@
 import { fs } from '@tarojs/helper'
 import * as taroize from '@tarojs/taroize'
+import wxTransformer from '@tarojs/transformer-wx'
 
 import Convertor from '../src/index'
 import { copyFileToTaro } from '../src/util'
@@ -44,8 +45,13 @@ describe('语法转换', () => {
       logFilePath: '',
     }
 
-    jest.spyOn(Convertor.prototype, 'init').mockImplementation(() => {})
+    jest.spyOn(Convertor.prototype, 'init').mockImplementation(() => { })
     convert = new Convertor('', false)
+  })
+
+  // 还原模拟函数
+  afterEach(() => {
+    jest.restoreAllMocks()
   })
 
   test('使用新建的setData替换组件中this.data.xx，实现this.data.xx的转换', () => {
@@ -102,12 +108,48 @@ describe('语法转换', () => {
     )
     expect(css).toBe('background-image: url("data:image/png;base64,TB0pX/TB0PX/TB0rpX/TB0RPX");')
   })
+
+  test('支持export from语法', () => {
+    const code = `
+      export { var1, func1 } from './tools1'
+    `
+    const file = '/wechatTest/export_from/pages/index/tools2.js'
+    const outputFilePath = '/wechatTest/export_from/taroConvert/src/pages/index/tools2.js'
+
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true)
+    jest.mock('@tarojs/helper', () => {
+      return {
+        fs: {
+          lstatSync: jest.fn().mockImplementation(() => ({
+            isDirectory: jest.fn().mockReturnValue(false),
+            // 如果需要其他方法，也可以在这里添加
+          })),
+        },
+      }
+    })
+
+    const transformResult = wxTransformer({
+      code,
+      sourcePath: file,
+      isNormal: true,
+      isTyped: true,
+      logFilePath: '',
+    })
+
+    const { scriptFiles } = convert.parseAst({
+      ast: transformResult.ast,
+      outputFilePath,
+      sourceFilePath: file,
+    })
+
+    expect(scriptFiles.has('\\wechatTest\\export_from\\pages\\index\\tools1.js')).toBe(true)
+  })
 })
 
 describe('文件转换', () => {
   let convert
   beforeAll(() => {
-    jest.spyOn(Convertor.prototype, 'init').mockImplementation(() => {})
+    jest.spyOn(Convertor.prototype, 'init').mockImplementation(() => { })
     convert = new Convertor('', false)
   })
 
@@ -170,7 +212,7 @@ describe('page页面转换', () => {
       logFilePath: '',
     }
 
-    jest.spyOn(Convertor.prototype, 'init').mockImplementation(() => {})
+    jest.spyOn(Convertor.prototype, 'init').mockImplementation(() => { })
 
     // new Convertot后会直接执行 init()，为确保 init() 在测试中通过采用 spyOn 去模拟
     jest.spyOn(Convertor.prototype, 'getApp').mockImplementation(() => {
@@ -204,7 +246,7 @@ describe('page页面转换', () => {
     param.path = 'import_template'
 
     // 模拟writeFileToTaro文件写入方法，避免imports文件夹写入到taro工程
-    jest.spyOn(Convertor.prototype, 'writeFileToTaro').mockImplementation(() => {})
+    jest.spyOn(Convertor.prototype, 'writeFileToTaro').mockImplementation(() => { })
 
     const taroizeResult = taroize({
       ...param,
