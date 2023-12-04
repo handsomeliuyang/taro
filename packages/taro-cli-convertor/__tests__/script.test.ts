@@ -1,5 +1,6 @@
 import { fs } from '@tarojs/helper'
 import * as taroize from '@tarojs/taroize'
+import wxTransformer from '@tarojs/transformer-wx'
 
 import Convertor from '../src/index'
 import { copyFileToTaro } from '../src/util'
@@ -46,6 +47,11 @@ describe('语法转换', () => {
 
     jest.spyOn(Convertor.prototype, 'init').mockImplementation(() => {})
     convert = new Convertor('', false)
+  })
+
+  // 还原模拟函数
+  afterEach(() => {
+    jest.resetAllMocks()
   })
 
   test('使用新建的setData替换组件中this.data.xx，实现this.data.xx的转换', () => {
@@ -101,6 +107,32 @@ describe('语法转换', () => {
       'background-image: url("data:image/png;base64,TB0pX/TB0PX/TB0rpX/TB0RPX");'
     )
     expect(css).toBe('background-image: url("data:image/png;base64,TB0pX/TB0PX/TB0rpX/TB0RPX");')
+  })
+
+  test('支持export from语法', () => {
+    const code = `
+      export { var1, func1 } from './tools1'
+    `
+    const file = '/wechatTest/export_from/pages/index/tools2.js'
+    const outputFilePath = '/wechatTest/export_from/taroConvert/src/pages/index/tools2.js'
+
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true)
+
+    const transformResult = wxTransformer({
+      code,
+      sourcePath: file,
+      isNormal: true,
+      isTyped: true,
+      logFilePath: '',
+    })
+
+    const { scriptFiles } = convert.parseAst({
+      ast: transformResult.ast,
+      outputFilePath,
+      sourceFilePath: file,
+    })
+
+    expect(scriptFiles.has('\\wechatTest\\export_from\\pages\\index\\tools1.js')).toBe(true)
   })
 })
 
