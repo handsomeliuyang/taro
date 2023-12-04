@@ -1,5 +1,6 @@
 import { fs } from '@tarojs/helper'
 import * as taroize from '@tarojs/taroize'
+import wxTransformer from '@tarojs/transformer-wx'
 
 import Convertor from '../src/index'
 import { copyFileToTaro } from '../src/util'
@@ -24,6 +25,12 @@ interface ITaroizeOptions {
 describe('语法转换', () => {
   let convert
   let param: ITaroizeOptions
+
+  // 还原模拟函数
+  afterEach(() => {
+    jest.resetAllMocks()
+  })
+
   beforeAll(() => {
     /**
      * json：index.json的内容
@@ -102,6 +109,32 @@ describe('语法转换', () => {
     )
     expect(css).toBe('background-image: url("data:image/png;base64,TB0pX/TB0PX/TB0rpX/TB0RPX");')
   })
+
+  test('支持export from语法', () => {
+    const code = `
+      export { var1, func1 } from './tools1'
+    `
+    const file = '/wechatTest/export_from/pages/index/tools2.js'
+    const outputFilePath = '/wechatTest/export_from/taroConvert/src/pages/index/tools2.js'
+
+    jest.spyOn(fs, 'existsSync').mockReturnValue(true)
+
+    const transformResult = wxTransformer({
+      code,
+      sourcePath: file,
+      isNormal: true,
+      isTyped: true,
+      logFilePath: '',
+    })
+
+    const { scriptFiles } = convert.parseAst({
+      ast: transformResult.ast,
+      outputFilePath,
+      sourceFilePath: file,
+    })
+
+    expect(scriptFiles.has('\\wechatTest\\export_from\\pages\\index\\tools1.js')).toBe(true)
+  })
 })
 
 describe('文件转换', () => {
@@ -150,6 +183,12 @@ describe('page页面转换', () => {
   let convert
   let param: ITaroizeOptions
   const entryJSON = { pages: ['pages/index/index'] }
+
+  // 还原模拟函数
+  afterEach(() => {
+    jest.resetAllMocks()
+  })
+
   beforeAll(() => {
     /**
      * json：index.json的内容
