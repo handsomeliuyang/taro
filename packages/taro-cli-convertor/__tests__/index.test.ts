@@ -2,8 +2,8 @@ import * as taroize from '@tarojs/taroize'
 import * as path from 'path'
 
 import Convertor from '../src/index'
-import { setMockFiles } from './__mocks__/fs-extra'
-import { root } from './data/fileData'
+import { getResMapFile, setMockFiles } from './__mocks__/fs-extra'
+import { root, USINGCOMPONENTS_FILE_DATA } from './data/fileData'
 import { generateMinimalEscapeCode, removeBackslashesSerializer } from './util'
 
 expect.addSnapshotSerializer(removeBackslashesSerializer)
@@ -423,5 +423,31 @@ describe('parseAst', () => {
     // 将ast转换为代码
     const jsCode = generateMinimalEscapeCode(ast)
     expect(jsCode).toMatchSnapshot()
+  })
+  test('子组件内部标签引用公共组件时，解析app.json文件里公共组件,使子组件生效',()=>{
+  
+    // 设置初始文件信息
+    setMockFiles(root, USINGCOMPONENTS_FILE_DATA)
+    const depComponents = new Set([
+      {
+        name:'cpt2',
+        path:path.join(root,'/components/cpt2')
+      },
+      {
+        name:'cpt3',
+        path:path.join(root,'/components/cpt3')
+      },
+      {
+        name:'cpt',
+        path:path.join(root,'/components/cpt')
+      }
+    ])
+    convert = new Convertor(root, false)
+    convert.framework = 'react'
+    convert.entryJSONPath = path.join(root,'/app.json')
+    convert.traversePages(root, new Set(['pages/index/index']))
+    convert.traverseComponents(root, new Set(depComponents))
+    const resFileMap = getResMapFile()
+    expect(resFileMap).toMatchSnapshot()
   })
 })

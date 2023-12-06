@@ -1637,6 +1637,23 @@ ${code}
             })
             delete componentConfig.usingComponents
           }
+          // 子组件嵌套使用app.json注册的公共组件
+          const entryJsonUseComponent = JSON.parse(String(fs.readFileSync(this.entryJSONPath))).usingComponents
+          if (Object.keys(entryJsonUseComponent).length && entryJsonUseComponent) {
+            Object.keys(entryJsonUseComponent).forEach((componentName) => {
+              let usingComponentPath = path.join(this.entryJSONPath, '..', entryJsonUseComponent[componentName])
+              // 支持将组件库放在工程根目录下
+              if (!fs.existsSync(resolveScriptPath(usingComponentPath))) {
+                usingComponentPath = path.join(this.root, entryJsonUseComponent[componentName])
+              }
+              if (!entryJsonUseComponent[componentName].startsWith('plugin://')) {
+                depComponents.add({
+                  name: componentName,
+                  path: usingComponentPath,
+                })
+              }
+            })
+          }
           param.json = JSON.stringify(componentConfig)
         }
         param.script = String(fs.readFileSync(componentJSPath))

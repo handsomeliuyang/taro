@@ -303,3 +303,123 @@ export const DEMO_JS_FILES = {
     </view>
   `,
 }
+
+// 小程序组件
+export const USINGCOMPONENTS_FILE_DATA = {
+  /**
+   * 构造一个引用组件的三级目录
+   * app.json里设置公共组测组件cpt
+   * cpt2调用cpt组件，cpt3调用cpt2组件
+   * 因为cpt2和cpt3为非公共组件，所以需在page/index.json里面需要引用这两个子组件
+   * cpt3嵌套cpt2，也需要在其json里引用cpt2
+   */
+
+  '/app.json': `
+      {
+        "pages":[
+          "pages/index/index"
+        ],
+        "usingComponents": {
+          "cpt": "/components/cpt/cpt"
+        }
+      }
+    `,
+  '/app.js':`
+      app({})
+    `,
+  '/package.config.json': `{}`,
+  '/pages/index/index.js':`Page({})`,
+  '/pages/index/index.json':`
+      {
+        "usingComponents": {
+          "cpt2": "/components/cpt2/cpt2",
+          "cpt3": "/components/cpt3/cpt3"
+        }
+      }
+    `,
+  '/pages/index/index.wxml':`
+      <view>
+        <cpt2></cpt2>
+        <cpt3></cpt3>
+      </view>
+    `,
+  '/components/cpt/cpt.js':`
+      Component({
+        properties: {
+          text: {
+            type: String,
+            value: 'cpt'
+          },
+          buttonText: {
+            type: String,
+            value: 'Click Me!'
+          }
+        }
+      })
+    `,
+  '/components/cpt/cpt.json':`
+    {
+      "component": true,
+      "usingComponents": {}
+    }
+    `,
+  '/components/cpt/cpt.wxml':`
+      <view>cpt</view>
+    `,
+  '/components/cpt2/cpt2.js':`
+      Component({
+        properties: {
+          text: {
+            type: String,
+            value: 'cpt2'
+          },
+          buttonText: {
+            type: String,
+            value: 'Click Me!'
+          }
+        }
+      })
+    `,
+  '/components/cpt2/cpt2.json':`
+    {
+      "component": true,
+      "usingComponents": {
+      }
+    }
+    `,
+  '/components/cpt2/cpt2.wxml':`
+      <view>
+        <cpt></cpt>
+        cpt2
+      </view>
+    `,
+  '/components/cpt3/cpt3.js':`
+      Component({
+        properties: {
+          text: {
+            type: String,
+            value: 'cpt3'
+          },
+          buttonText: {
+            type: String,
+            value: 'Click Me!'
+          }
+        }
+      })
+    `,
+  '/components/cpt3/cpt3.json':`
+    {
+      "component": true,
+      "usingComponents": {
+        "cpt2": "/components/cpt2/cpt2"
+      }
+    }
+    `,
+  '/components/cpt3/cpt3.wxml':`
+      <view>
+        <cpt2></cpt2>
+        cpt3
+      </view>
+    `
+}
+

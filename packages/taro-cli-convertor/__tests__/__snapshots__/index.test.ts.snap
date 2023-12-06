@@ -84,6 +84,115 @@ class _C extends React.Component {
 export default _C;
 `;
 
+exports[`parseAst 子组件内部标签引用公共组件时，解析app.json文件里公共组件,使子组件生效 1`] = `
+Map {
+  /wxProject/pages/index/index.js => import withWeapp, { cacheOptions } from '@tarojs/with-weapp'
+import { Block, View } from '@tarojs/components'
+import React from 'react'
+import Taro from '@tarojs/taro'
+import Cpt3 from '../../components/cpt3/cpt3'
+import Cpt2 from '../../components/cpt2/cpt2'
+cacheOptions.setOptionsToCache({})
+@withWeapp(cacheOptions.getOptionsFromCache())
+class _C extends React.Component {
+  render() {
+    return (
+      <View>
+        <Cpt2></Cpt2>
+        <Cpt3></Cpt3>
+      </View>
+    )
+  }
+}
+export default _C
+,
+  /wxProject/pages/index/index.config.js => export default {}
+,
+  /wxProject/components/cpt2/cpt2.js => import withWeapp, { cacheOptions } from '@tarojs/with-weapp'
+import { Block, View } from '@tarojs/components'
+import React from 'react'
+import Taro from '@tarojs/taro'
+import Cpt from '../cpt/cpt'
+cacheOptions.setOptionsToCache({
+  properties: {
+    text: {
+      type: String,
+      value: 'cpt2',
+    },
+    buttonText: {
+      type: String,
+      value: 'Click Me!',
+    },
+  },
+})
+@withWeapp(cacheOptions.getOptionsFromCache())
+class _C extends React.Component {
+  render() {
+    return (
+      <View>
+        <Cpt></Cpt>cpt2
+      </View>
+    )
+  }
+}
+export default _C
+,
+  /wxProject/components/cpt/cpt.js => import withWeapp, { cacheOptions } from '@tarojs/with-weapp'
+import { Block, View } from '@tarojs/components'
+import React from 'react'
+import Taro from '@tarojs/taro'
+cacheOptions.setOptionsToCache({
+  properties: {
+    text: {
+      type: String,
+      value: 'cpt',
+    },
+    buttonText: {
+      type: String,
+      value: 'Click Me!',
+    },
+  },
+})
+@withWeapp(cacheOptions.getOptionsFromCache())
+class _C extends React.Component {
+  render() {
+    return <View>cpt</View>
+  }
+}
+export default _C
+,
+  /wxProject/components/cpt3/cpt3.js => import withWeapp, { cacheOptions } from '@tarojs/with-weapp'
+import { Block, View } from '@tarojs/components'
+import React from 'react'
+import Taro from '@tarojs/taro'
+import Cpt2 from '../cpt2/cpt2'
+cacheOptions.setOptionsToCache({
+  properties: {
+    text: {
+      type: String,
+      value: 'cpt3',
+    },
+    buttonText: {
+      type: String,
+      value: 'Click Me!',
+    },
+  },
+})
+@withWeapp(cacheOptions.getOptionsFromCache())
+class _C extends React.Component {
+  render() {
+    return (
+      <View>
+        <Cpt2></Cpt2>cpt3
+      </View>
+    )
+  }
+}
+export default _C
+,
+}
+`;
+
 exports[`parseAst 当使用e.target.dataset时引入工具函数 getTarget 1`] = `
 import withWeapp, { cacheOptions, getTarget } from "@tarojs/with-weapp";
 import { Block, View, Button } from "@tarojs/components";
