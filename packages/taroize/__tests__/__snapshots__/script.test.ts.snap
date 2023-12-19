@@ -154,7 +154,7 @@ Page({
     console.log(personal.info?.age);
   }
 });
-@withWeapp(cacheOptions.getOptionsFromCache(), true)
+@withWeapp(cacheOptions.getOptionsFromCache())
 class _C extends React.Component {
   render() {
     return <Block>123</Block>;

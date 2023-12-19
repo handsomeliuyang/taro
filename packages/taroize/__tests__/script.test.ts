@@ -170,7 +170,6 @@ describe('parseScript', () => {
     `
     option.wxml = '123'
     option.path = 'test_operation'
-    option.isApp = true
 
     const { ast } = parse(option)
     const code = generateMinimalEscapeCode(ast)
