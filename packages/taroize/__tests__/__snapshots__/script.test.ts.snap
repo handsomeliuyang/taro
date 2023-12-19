@@ -135,3 +135,30 @@ class _C extends React.Component {
 }
 export default _C;
 `;
+
+exports[`parseScript 解析?.操作符 1`] = `
+import { Block } from "@tarojs/components";
+import React from "react";
+import Taro from "@tarojs/taro";
+const {
+  default: withWeapp
+} = require("@tarojs/with-weapp");
+Page({
+  getData() {
+    const personal = {
+      name: 'xz',
+      info: {
+        age: 18
+      }
+    };
+    console.log(personal.info?.age);
+  }
+});
+@withWeapp(cacheOptions.getOptionsFromCache(), true)
+class _C extends React.Component {
+  render() {
+    return <Block>123</Block>;
+  }
+}
+export default _C;
+`;
