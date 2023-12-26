@@ -47,6 +47,22 @@
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",
       "disableOptimisticBPs": true
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "test report",
+      "program": "${workspaceFolder}/packages/taro-cli-convertor/bin/taro-convert",
+      "cwd": "D:/workspace/demo/report-demo/demo",
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "demo-if-test",
+      "program": "${workspaceFolder}/packages/taro-cli-convertor/bin/taro-convert",
+      "cwd": "D:/workspace/demo/demo-if-test",
+      "skipFiles": ["<node_internals>/**"]
     }
   ]
 }
