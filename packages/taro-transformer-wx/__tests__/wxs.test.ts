@@ -35,4 +35,21 @@ describe('wxs.ts测试', () => {
     })
     expect(code).toMatchSnapshot()
   })
+
+  test('解析wxs文件中的?.操作符', () => {
+    const wxsCode = `
+      var personal = { name: 'xz', info: { age: 18 } }
+
+      module.exports = {
+        getInfo: function(){
+          return personal.info?.age || ''
+        }
+      }
+    `
+    const { code } = transform({
+      ...baseOptions,
+      code: wxsCode
+    })
+    expect(code).toMatchSnapshot()
+  })
 })

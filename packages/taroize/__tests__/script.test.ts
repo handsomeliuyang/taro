@@ -157,4 +157,22 @@ describe('parseScript', () => {
     const code = generateMinimalEscapeCode(ast)
     expect(code).toMatchSnapshot()
   })
+
+  // 解析?.操作符
+  test('解析?.操作符', () => {
+    option.script = `
+    Page({
+      getData(){
+        const personal = { name: 'xz', info: { age: 18 } }
+        console.log(personal.info?.age)
+      }
+    })
+    `
+    option.wxml = '123'
+    option.path = 'test_operation'
+
+    const { ast } = parse(option)
+    const code = generateMinimalEscapeCode(ast)
+    expect(code).toMatchSnapshot()
+  })
 })

@@ -9,3 +9,17 @@ module.exports = {
   date3: new Date("2017-7-14")
 };
 `;
+
+exports[`wxs.ts测试 解析wxs文件中的?.操作符 1`] = `
+var personal = {
+  name: 'xz',
+  info: {
+    age: 18
+  }
+};
+module.exports = {
+  getInfo: function () {
+    return personal.info?.age || '';
+  }
+};
+`;
