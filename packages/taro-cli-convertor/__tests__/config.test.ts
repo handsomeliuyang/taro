@@ -1,5 +1,5 @@
 import Convertor from '../src'
-import { clearMockFiles, normalizePath, resFileMap, setMockFiles  } from './__mocks__/fs-extra'
+import { clearMockFiles, getResMapFile, normalizePath, resFileMap, setMockFiles } from './__mocks__/fs-extra'
 import { DEMO_JS_FILE_INFO, root } from './data/fileData'
 import { removeBackslashesSerializer } from './util'
 
@@ -8,37 +8,37 @@ expect.addSnapshotSerializer(removeBackslashesSerializer)
 const pathSystem = require('path')
 
 jest.mock('fs', () => {
-  const originalModule = jest.requireActual('fs') 
+  const originalModule = jest.requireActual('fs')
   return {
     ...originalModule,
     promises: {
       ...originalModule.promises,
-      writeFile: jest.fn((path,data) => {
+      writeFile: jest.fn((path, data) => {
         let resPath = ''
-        if(pathSystem.isAbsolute(path)){
+        if (pathSystem.isAbsolute(path)) {
           const resArr = normalizePath(path).split(root)
-          if(resArr.length === 0){
+          if (resArr.length === 0) {
             resPath = normalizePath(path).split(root)[0]
           } else {
             resPath = normalizePath(path).split(root)[1]
           }
         }
-        if(Buffer.isBuffer(data)){
+        if (Buffer.isBuffer(data)) {
           data = Buffer.from(data).toString('utf8')
         }
         resFileMap.set(root + resPath, data)
       }),
-      stat:jest.fn(() => {
+      stat: jest.fn(() => {
         return {
-          isDirectory:() => true
+          isDirectory: () => true,
         }
-      })
+      }),
     },
   }
 })
 
 describe('小程序转换生成配置文件', () => {
-  beforeAll(()=>{
+  beforeAll(() => {
     jest.spyOn(Convertor.prototype, 'init').mockImplementation(() => {})
   })
 
@@ -47,7 +47,7 @@ describe('小程序转换生成配置文件', () => {
     clearMockFiles()
     jest.restoreAllMocks()
   })
-  
+
   test('配置文件生成', (done) => {
     setMockFiles(root, DEMO_JS_FILE_INFO)
     const convertor = new Convertor(root, false)
@@ -55,8 +55,203 @@ describe('小程序转换生成配置文件', () => {
     convertor.generateConfigFiles()
     setTimeout(() => {
       expect(resFileMap).toMatchSnapshot()
-      done() 
-    }, 4000) 
+      done()
+    }, 4500)
   })
 })
 
+describe('日志', () => {
+  beforeAll(() => {
+    // mock报告生成
+    jest.spyOn(Convertor.prototype, 'generateReport').mockImplementation(() => {})
+
+    // 配置文件生成
+    jest.spyOn(Convertor.prototype, 'generateConfigFiles').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    // 清空文件信息
+    clearMockFiles()
+  })
+
+  afterAll(() => {
+    jest.restoreAllMocks()
+  })
+
+  test('生成日志', () => {
+    setMockFiles(root, DEMO_JS_FILE_INFO)
+    const convertor = new Convertor(root, false)
+    convertor.run()
+    const resFileMap = getResMapFile()
+    expect(resFileMap.get('/wxProject/taroConvert/.convert/convert.log')).toMatchSnapshot()
+  })
+})
+
+describe('转换报告', () => {
+  beforeAll(() => {
+    // 配置文件生成
+    jest.spyOn(Convertor.prototype, 'generateConfigFiles').mockImplementation(() => {})
+  })
+
+  afterEach(() => {
+    // 清空文件信息
+    clearMockFiles()
+  })
+
+  afterAll(() => {
+    jest.restoreAllMocks()
+  })
+
+  test('生成转换报告文件', () => {
+    const REPORT_DEMO = {
+      '/pages': {
+        '/index': {
+          '/index.js': `
+            const app = getApp()
+            Page({
+              data: {
+                motto: 'Hello World',
+              },
+              onLoad() {}
+            })
+          `,
+          '/index.json': `
+            {
+              "usingComponents": {}
+            }
+          `,
+          '/index.wxml': `
+            <view>
+              <text>{{motto}}</text>
+            </view>
+          `,
+          '/index.wxss': '',
+        },
+      },
+      '/project.config.json': `{}`,
+      '/app.js': `App({})`,
+      '/app.json': `
+        {
+          "pages":[
+            "pages/index/index"
+          ]
+        }
+      `,
+    }
+    setMockFiles(root, REPORT_DEMO)
+    const convertor = new Convertor(root, false)
+    convertor.run()
+    const resFileMap = getResMapFile()
+
+    expect(resFileMap.has('/wxProject/taroConvert/report')).toBeTruthy()
+    expect(resFileMap.has('/wxProject/taroConvert/report/static/js')).toBeTruthy()
+    expect(resFileMap.has('/wxProject/taroConvert/report/static/css')).toBeTruthy()
+    expect(resFileMap.has('/wxProject/taroConvert/report/static/media')).toBeTruthy()
+  })
+
+  describe('转换报告记录错误信息', () => {
+    beforeAll(() => {
+      // 配置文件生成
+      jest.spyOn(Convertor.prototype, 'generateConfigFiles').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      // 清空文件信息
+      clearMockFiles()
+      jest.restoreAllMocks()
+    })
+
+    afterAll(() => {
+      jest.restoreAllMocks()
+    })
+
+    test('图片路径不存在', () => {
+      const REPORT_DEMO = {
+        '/pages': {
+          '/index': {
+            '/index.js': `
+              const app = getApp()
+              Page({
+                data: {
+                  motto: 'Hello World',
+                },
+                onLoad() {}
+              })
+            `,
+            '/index.json': `
+              {
+                "usingComponents": {}
+              }
+            `,
+            '/index.wxml': `
+              <view>
+                <text>{{motto}}</text>
+              </view>
+              <image src="/images/tutu.jpg" mode=""/>
+            `,
+            '/index.wxss': '',
+          },
+        },
+        '/images': {},
+        '/project.config.json': `{}`,
+        '/app.js': `App({})`,
+        '/app.json': `
+          {
+            "pages":[
+              "pages/index/index"
+            ]
+          }
+        `,
+      }
+      setMockFiles(root, REPORT_DEMO)
+      const convertor = new Convertor(root, false)
+      convertor.run()
+      const resFileMap = getResMapFile()
+
+      expect(resFileMap.has('/wxProject/taroConvert/report')).toBeTruthy()
+      expect(resFileMap.has('/wxProject/taroConvert/report/static/js')).toBeTruthy()
+      expect(resFileMap.has('/wxProject/taroConvert/report/static/css')).toBeTruthy()
+      expect(resFileMap.has('/wxProject/taroConvert/report/static/media')).toBeTruthy()
+    })
+
+    test('app.json不存在', () => {
+      const REPORT_DEMO = {
+        '/pages': {
+          '/index': {
+            '/index.js': `
+              const app = getApp()
+              Page({
+                data: {
+                  motto: 'Hello World',
+                },
+                onLoad() {}
+              })
+            `,
+            '/index.json': `
+              {
+                "usingComponents": {}
+              }
+            `,
+            '/index.wxml': `
+              <view>
+                <text>{{motto}}</text>
+              </view>
+              <image src="/images/tutu.jpg" mode=""/>
+            `,
+            '/index.wxss': '',
+          },
+        },
+        '/images': {},
+        '/project.config.json': `{}`,
+        '/app.js': `App({})`,
+      }
+      setMockFiles(root, REPORT_DEMO)
+      jest.spyOn(process, 'exit').mockImplementation()
+      const spy = jest.spyOn(console, 'log')
+      const convertor = new Convertor(root, false)
+      expect(spy).toHaveBeenCalledTimes(3)
+      expect(spy.mock.calls[1][0]).toMatchInlineSnapshot(`[31mapp.json 读取失败，请检查！[39m`)
+      convertor.run()
+    })
+  })
+})

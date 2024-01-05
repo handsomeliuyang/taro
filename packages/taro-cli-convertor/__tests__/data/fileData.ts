@@ -50,6 +50,7 @@ export const DEMO_JS_FILE_INFO_MINIPROGRANROOT = {
       ]
     }
   `,
+  '/miniprogram/app.wxss':'',
   '/miniprogram/pages/index/index.js': `
     const app = getApp()
       Page({

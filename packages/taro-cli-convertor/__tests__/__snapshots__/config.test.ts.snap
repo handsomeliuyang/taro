@@ -93,3 +93,245 @@ Map {
 ,
 }
 `;
+
+exports[`日志 生成日志 1`] = `
+INFO [taro-cli-convertor] parseAst - 入参 
+{"sourceFilePath":"wxProjectapp.js","outputFilePath":"wxProjectapp.js","importStylePath":null,"imports":[]} 
+INFO [taro-cli-convertor] parseAst - 解析ImportDeclaration 
+import { Block } from "@tarojs/components"; 
+INFO [taro-cli-convertor] analyzeImportUrl - 入参 
+sourceFilePath: wxProjectapp.js 
+value: @tarojs/components 
+INFO [taro-cli-convertor] parseAst - 解析ImportDeclaration 
+import React from "react"; 
+INFO [taro-cli-convertor] analyzeImportUrl - 入参 
+sourceFilePath: wxProjectapp.js 
+value: react 
+INFO [taro-cli-convertor] parseAst - 解析ImportDeclaration 
+import Taro from "@tarojs/taro"; 
+INFO [taro-cli-convertor] analyzeImportUrl - 入参 
+sourceFilePath: wxProjectapp.js 
+value: @tarojs/taro 
+INFO [taro-cli-convertor] parseAst - 解析CallExpression 
+require("@tarojs/with-weapp") 
+INFO [taro-cli-convertor] analyzeImportUrl - 入参 
+sourceFilePath: wxProjectapp.js 
+value: @tarojs/with-weapp 
+INFO [taro-cli-convertor] parseAst - 解析CallExpression 
+App({}) 
+INFO [taro-cli-convertor] parseAst - 解析CallExpression 
+cacheOptions.setOptionsToCache({}) 
+INFO [taro-cli-convertor] parseAst - 解析MemberExpression 
+cacheOptions.setOptionsToCache 
+INFO [taro-cli-convertor] parseAst - 解析ClassDeclaration 
+@withWeapp(cacheOptions.getOptionsFromCache(), true)
+class App extends React.Component {
+  render() {
+    return this.props.children;
+  }
+} 
+INFO [taro-cli-convertor] parseAst - 解析MemberExpression 
+this.props.children 
+INFO [taro-cli-convertor] parseAst - 解析MemberExpression 
+this.props 
+INFO [taro-cli-convertor] parseAst - 解析MemberExpression 
+React.Component 
+INFO [taro-cli-convertor] parseAst - 解析CallExpression 
+withWeapp(cacheOptions.getOptionsFromCache(), true) 
+INFO [taro-cli-convertor] parseAst - 解析CallExpression 
+cacheOptions.getOptionsFromCache() 
+INFO [taro-cli-convertor] parseAst - 解析MemberExpression 
+cacheOptions.getOptionsFromCache 
+INFO [taro-cli-convertor] parseAst - 解析StringLiteral 
+"@tarojs/with-weapp" 
+INFO [taro-cli-convertor] parseAst - 解析StringLiteral 
+"@tarojs/components" 
+INFO [taro-cli-convertor] parseAst - 解析StringLiteral 
+"react" 
+INFO [taro-cli-convertor] parseAst - 解析StringLiteral 
+"@tarojs/taro" 
+INFO [taro-cli-convertor] parseAst - 解析StringLiteral 
+"@tarojs/with-weapp" 
+INFO [taro-cli-convertor] convertToOptional - 解析ObjectProperty 
+cacheOptions 
+INFO [taro-cli-convertor] convertToOptional - 解析CallExpression 
+require("@tarojs/with-weapp") 
+INFO [taro-cli-convertor] convertToOptional - 解析ObjectProperty 
+default: withWeapp 
+INFO [taro-cli-convertor] convertToOptional - 解析CallExpression 
+require("@tarojs/with-weapp") 
+INFO [taro-cli-convertor] convertToOptional - 解析CallExpression 
+cacheOptions.setOptionsToCache({}) 
+INFO [taro-cli-convertor] convertToOptional - 解析ClassBody 
+{
+  render() {
+    return this.props.children;
+  }
+} 
+INFO [taro-cli-convertor] convertToOptional - 解析MemberExpression 
+{
+  render() {
+    return this.props.children;
+  }
+} 
+INFO [taro-cli-convertor] convertToOptional - 解析MemberExpression 
+{
+  render() {
+    return this.props.children;
+  }
+} 
+INFO [taro-cli-convertor] convertToOptional - 解析CallExpression 
+withWeapp(cacheOptions.getOptionsFromCache(), true) 
+INFO [taro-cli-convertor] convertToOptional - 解析CallExpression 
+cacheOptions.getOptionsFromCache() 
+INFO [taro-cli-convertor] parseAst - 解析VariableDeclaration 
+const {
+  cacheOptions
+} = require("@tarojs/with-weapp"); 
+INFO [taro-cli-convertor] parseAst - 解析VariableDeclaration 
+const {
+  default: withWeapp
+} = require("@tarojs/with-weapp"); 
+INFO [taro-cli-convertor] traversePages - 开始转换页面 
+pages/index/index 
+INFO [taro-cli-convertor] parseAst - 入参 
+{"sourceFilePath":"wxProjectpagesindexindex.js","outputFilePath":"wxProjectpagesindexindex.js","importStylePath":null,"depComponents":{},"imports":[],"pluginComponents":{}} 
+INFO [taro-cli-convertor] parseAst - 解析ImportDeclaration 
+import { Block, View, Text } from "@tarojs/components"; 
+INFO [taro-cli-convertor] analyzeImportUrl - 入参 
+sourceFilePath: wxProjectpagesindexindex.js 
+value: @tarojs/components 
+INFO [taro-cli-convertor] parseAst - 解析ImportDeclaration 
+import React from "react"; 
+INFO [taro-cli-convertor] analyzeImportUrl - 入参 
+sourceFilePath: wxProjectpagesindexindex.js 
+value: react 
+INFO [taro-cli-convertor] parseAst - 解析ImportDeclaration 
+import Taro from "@tarojs/taro"; 
+INFO [taro-cli-convertor] analyzeImportUrl - 入参 
+sourceFilePath: wxProjectpagesindexindex.js 
+value: @tarojs/taro 
+INFO [taro-cli-convertor] parseAst - 解析CallExpression 
+require("@tarojs/with-weapp") 
+INFO [taro-cli-convertor] analyzeImportUrl - 入参 
+sourceFilePath: wxProjectpagesindexindex.js 
+value: @tarojs/with-weapp 
+INFO [taro-cli-convertor] parseAst - 解析CallExpression 
+Taro.getApp() 
+INFO [taro-cli-convertor] parseAst - 解析MemberExpression 
+Taro.getApp 
+INFO [taro-cli-convertor] parseAst - 解析CallExpression 
+Page({
+  data: {
+    motto: 'Hello World'
+  },
+  onLoad() {}
+}) 
+INFO [taro-cli-convertor] parseAst - 解析CallExpression 
+cacheOptions.setOptionsToCache({
+  data: {
+    motto: 'Hello World'
+  },
+  onLoad() {}
+}) 
+INFO [taro-cli-convertor] parseAst - 解析MemberExpression 
+cacheOptions.setOptionsToCache 
+INFO [taro-cli-convertor] parseAst - 解析ClassDeclaration 
+@withWeapp(cacheOptions.getOptionsFromCache())
+class _C extends React.Component {
+  render() {
+    const {
+      motto
+    } = this.data;
+    return <View><Text>{motto}</Text></View>;
+  }
+} 
+INFO [taro-cli-convertor] parseAst - 解析MemberExpression 
+this.data 
+INFO [taro-cli-convertor] parseAst - 解析JSXElement 
+<View><Text>{motto}</Text></View> 
+INFO [taro-cli-convertor] parseAst - 解析JSXElement 
+<Text>{motto}</Text> 
+INFO [taro-cli-convertor] parseAst - 解析MemberExpression 
+React.Component 
+INFO [taro-cli-convertor] parseAst - 解析CallExpression 
+withWeapp(cacheOptions.getOptionsFromCache()) 
+INFO [taro-cli-convertor] parseAst - 解析CallExpression 
+cacheOptions.getOptionsFromCache() 
+INFO [taro-cli-convertor] parseAst - 解析MemberExpression 
+cacheOptions.getOptionsFromCache 
+INFO [taro-cli-convertor] parseAst - 解析StringLiteral 
+"@tarojs/with-weapp" 
+INFO [taro-cli-convertor] parseAst - 解析StringLiteral 
+"@tarojs/components" 
+INFO [taro-cli-convertor] parseAst - 解析StringLiteral 
+"react" 
+INFO [taro-cli-convertor] parseAst - 解析StringLiteral 
+"@tarojs/taro" 
+INFO [taro-cli-convertor] parseAst - 解析StringLiteral 
+"@tarojs/with-weapp" 
+INFO [taro-cli-convertor] parseAst - 解析StringLiteral 
+'Hello World' 
+INFO [taro-cli-convertor] convertToOptional - 解析ObjectProperty 
+cacheOptions 
+INFO [taro-cli-convertor] convertToOptional - 解析CallExpression 
+require("@tarojs/with-weapp") 
+INFO [taro-cli-convertor] convertToOptional - 解析ObjectProperty 
+default: withWeapp 
+INFO [taro-cli-convertor] convertToOptional - 解析CallExpression 
+require("@tarojs/with-weapp") 
+INFO [taro-cli-convertor] convertToOptional - 解析CallExpression 
+Taro.getApp() 
+INFO [taro-cli-convertor] convertToOptional - 解析CallExpression 
+cacheOptions.setOptionsToCache({
+  data: {
+    motto: 'Hello World'
+  },
+  onLoad() {}
+}) 
+INFO [taro-cli-convertor] convertToOptional - 解析ObjectProperty 
+data: {
+  motto: 'Hello World'
+} 
+INFO [taro-cli-convertor] convertToOptional - 解析ObjectProperty 
+motto: 'Hello World' 
+INFO [taro-cli-convertor] convertToOptional - 解析ClassBody 
+{
+  render() {
+    const {
+      motto
+    } = this.data;
+    return <View><Text>{motto}</Text></View>;
+  }
+} 
+INFO [taro-cli-convertor] convertToOptional - 解析MemberExpression 
+{
+  render() {
+    const {
+      motto
+    } = this.data;
+    return <View><Text>{motto}</Text></View>;
+  }
+} 
+INFO [taro-cli-convertor] convertToOptional - 解析ObjectProperty 
+motto 
+INFO [taro-cli-convertor] convertToOptional - 解析CallExpression 
+withWeapp(cacheOptions.getOptionsFromCache()) 
+INFO [taro-cli-convertor] convertToOptional - 解析CallExpression 
+cacheOptions.getOptionsFromCache() 
+INFO [taro-cli-convertor] parseAst - 解析VariableDeclaration 
+const {
+  cacheOptions
+} = require("@tarojs/with-weapp"); 
+INFO [taro-cli-convertor] parseAst - 解析VariableDeclaration 
+const {
+  default: withWeapp
+} = require("@tarojs/with-weapp"); 
+INFO [taro-cli-convertor] parseAst - 解析VariableDeclaration 
+const app = Taro.getApp(); 
+INFO [taro-cli-convertor] parseAst - 解析VariableDeclaration 
+const {
+  motto
+} = this.data; 
+
+`;

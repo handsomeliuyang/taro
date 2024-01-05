@@ -48,6 +48,7 @@ describe('微信小程序转换', () => {
     const convertor = new Convertor(root, false)
     convertor.run()
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -58,6 +59,7 @@ describe('微信小程序转换', () => {
     const convertor = new Convertor(root, false)
     convertor.run()
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -69,6 +71,7 @@ describe('微信小程序转换', () => {
     const convertor = new Convertor(root, false)
     convertor.run()
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -77,6 +80,7 @@ describe('微信小程序转换', () => {
     const convertor = new Convertor(root, false)
     convertor.run()
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -85,6 +89,7 @@ describe('微信小程序转换', () => {
     const convertor = new Convertor(root, false)
     convertor.run()
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -95,6 +100,7 @@ describe('微信小程序转换', () => {
     const convertor = new Convertor(root, false)
     convertor.run()
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -123,6 +129,7 @@ describe('微信小程序转换', () => {
     const convertor = new Convertor(root, false)
     convertor.run()
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -149,6 +156,7 @@ describe('微信小程序转换', () => {
     const convertor = new Convertor(root, false)
     convertor.run()
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 })
@@ -207,6 +215,7 @@ describe('配置文件解析转换', () => {
     const convert = new Convertor(root, false)
     convert.getSitemapLocation()
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 })
@@ -248,6 +257,7 @@ describe('文件转换', () => {
     const convert = new Convertor(root, false)
     convert.generateScriptFiles(new Set([normalizePath(path.join(root, '/utils/util.js'))]))
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -285,6 +295,7 @@ describe('文件转换', () => {
     convert.framework = 'react'
     convert.traversePages(root, new Set(['/pages/commentPage/commentPage']))
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -295,6 +306,7 @@ describe('文件转换', () => {
     const convertor = new Convertor(root, false)
     convertor.run()
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -363,6 +375,7 @@ describe('模版转换', () => {
     convert.framework = 'react'
     convert.traversePages(root, new Set(['/pages/simpleTemplatePage/simpleTemplatePage']))
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -400,6 +413,7 @@ describe('模版转换', () => {
     convert.framework = 'react'
     convert.traversePages(root, new Set(['/pages/mulVarTemplatePage/mulVarTemplatePage']))
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -442,6 +456,7 @@ describe('模版转换', () => {
     convert.framework = 'react'
     convert.traversePages(root, new Set(['/pages/templatePage_tempNameIsVar/templatePage_tempNameIsVar']))
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 
@@ -484,6 +499,7 @@ describe('模版转换', () => {
     convert.framework = 'react'
     convert.traversePages(root, new Set(['/pages/templatePage_tempNameContainsVar/templatePage_tempNameContainsVar']))
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 })
@@ -506,13 +522,14 @@ describe('公共组件引用', () => {
     clearMockFiles()
   })
 
-  test('子组件内部标签引用公共组件时，解析app.json文件里公共组件,使子组件生效', () => {
+  test('子组件内部标签引用公共组件时，解析app.json文件里公共组件，使子组件生效', () => {
     // 设置初始文件信息
     setMockFiles(root, PLUGIN_FILE_DATA)
     updateMockFiles(root, USINGCOMPONENTS_FILE_DATA)
     const convert = new Convertor(root, false)
     convert.run()
     const resFileMap = getResMapFile()
+    resFileMap.delete('/wxProject/taroConvert/.convert/convert.log')
     expect(resFileMap).toMatchSnapshot()
   })
 })
