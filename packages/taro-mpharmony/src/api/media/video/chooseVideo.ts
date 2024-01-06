@@ -24,7 +24,7 @@ export const chooseVideo: typeof Taro.chooseVideo = async (options) => {
   }
 
   const {
-    compressed =  true,
+    compressed = true,
     sourceType = ['album', 'camera'],
     maxDuration = 60,
     camera = 'back',
@@ -75,7 +75,7 @@ export const chooseVideo: typeof Taro.chooseVideo = async (options) => {
           duration: res.tempFiles[0].duration,
           height: res.tempFiles[0].height,
           size: res.tempFiles[0].size,
-          tempFilePath: res.tempFilePaths,
+          tempFilePath: res.tempFiles[0].tempFilePath,
           width: res.tempFiles[0].width,
           errMsg: res.errMsg,
         }
