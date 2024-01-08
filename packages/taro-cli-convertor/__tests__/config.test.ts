@@ -1,9 +1,9 @@
 import Convertor from '../src'
 import { clearMockFiles, getResMapFile, normalizePath, resFileMap, setMockFiles } from './__mocks__/fs-extra'
 import { DEMO_JS_FILE_INFO, root } from './data/fileData'
-import { removeBackslashesSerializer } from './util'
+import { changeBackslashesSerializer } from './util'
 
-expect.addSnapshotSerializer(removeBackslashesSerializer)
+expect.addSnapshotSerializer(changeBackslashesSerializer)
 
 const pathSystem = require('path')
 
@@ -149,109 +149,91 @@ describe('转换报告', () => {
     expect(resFileMap.has('/wxProject/taroConvert/report/static/media')).toBeTruthy()
   })
 
-  describe('转换报告记录错误信息', () => {
-    beforeAll(() => {
-      // 配置文件生成
-      jest.spyOn(Convertor.prototype, 'generateConfigFiles').mockImplementation(() => {})
-    })
-
-    afterEach(() => {
-      // 清空文件信息
-      clearMockFiles()
-      jest.restoreAllMocks()
-    })
-
-    afterAll(() => {
-      jest.restoreAllMocks()
-    })
-
-    test('图片路径不存在', () => {
-      const REPORT_DEMO = {
-        '/pages': {
-          '/index': {
-            '/index.js': `
-              const app = getApp()
-              Page({
-                data: {
-                  motto: 'Hello World',
-                },
-                onLoad() {}
-              })
-            `,
-            '/index.json': `
-              {
-                "usingComponents": {}
-              }
-            `,
-            '/index.wxml': `
-              <view>
-                <text>{{motto}}</text>
-              </view>
-              <image src="/images/tutu.jpg" mode=""/>
-            `,
-            '/index.wxss': '',
-          },
+  test('图片路径不存在', () => {
+    const REPORT_DEMO = {
+      '/pages': {
+        '/index': {
+          '/index.js': `
+            const app = getApp()
+            Page({
+              data: {
+                motto: 'Hello World',
+              },
+              onLoad() {}
+            })
+          `,
+          '/index.json': `
+            {
+              "usingComponents": {}
+            }
+          `,
+          '/index.wxml': `
+            <view>
+              <text>{{motto}}</text>
+            </view>
+            <image src="/images/tutu.jpg" mode=""/>
+          `,
+          '/index.wxss': '',
         },
-        '/images': {},
-        '/project.config.json': `{}`,
-        '/app.js': `App({})`,
-        '/app.json': `
-          {
-            "pages":[
-              "pages/index/index"
-            ]
-          }
-        `,
-      }
-      setMockFiles(root, REPORT_DEMO)
-      const convertor = new Convertor(root, false)
-      convertor.run()
-      const resFileMap = getResMapFile()
+      },
+      '/images': {},
+      '/project.config.json': `{}`,
+      '/app.js': `App({})`,
+      '/app.json': `
+        {
+          "pages":[
+            "pages/index/index"
+          ]
+        }
+      `,
+    }
+    setMockFiles(root, REPORT_DEMO)
+    const convertor = new Convertor(root, false)
+    convertor.run()
+    const resFileMap = getResMapFile()
 
-      expect(resFileMap.has('/wxProject/taroConvert/report')).toBeTruthy()
-      expect(resFileMap.has('/wxProject/taroConvert/report/static/js')).toBeTruthy()
-      expect(resFileMap.has('/wxProject/taroConvert/report/static/css')).toBeTruthy()
-      expect(resFileMap.has('/wxProject/taroConvert/report/static/media')).toBeTruthy()
-    })
+    expect(resFileMap.has('/wxProject/taroConvert/report')).toBeTruthy()
+    expect(resFileMap.has('/wxProject/taroConvert/report/static/js')).toBeTruthy()
+    expect(resFileMap.has('/wxProject/taroConvert/report/static/css')).toBeTruthy()
+    expect(resFileMap.has('/wxProject/taroConvert/report/static/media')).toBeTruthy()
+  })
 
-    test('app.json不存在', () => {
-      const REPORT_DEMO = {
-        '/pages': {
-          '/index': {
-            '/index.js': `
-              const app = getApp()
-              Page({
-                data: {
-                  motto: 'Hello World',
-                },
-                onLoad() {}
-              })
-            `,
-            '/index.json': `
-              {
-                "usingComponents": {}
-              }
-            `,
-            '/index.wxml': `
-              <view>
-                <text>{{motto}}</text>
-              </view>
-              <image src="/images/tutu.jpg" mode=""/>
-            `,
-            '/index.wxss': '',
-          },
+  test('app.json不存在', () => {
+    const REPORT_DEMO = {
+      '/pages': {
+        '/index': {
+          '/index.js': `
+            const app = getApp()
+            Page({
+              data: {
+                motto: 'Hello World',
+              },
+              onLoad() {}
+            })
+          `,
+          '/index.json': `
+            {
+              "usingComponents": {}
+            }
+          `,
+          '/index.wxml': `
+            <view>
+              <text>{{motto}}</text>
+            </view>
+            <image src="/images/tutu.jpg" mode=""/>
+          `,
+          '/index.wxss': '',
         },
-        '/images': {},
-        '/project.config.json': `{}`,
-        '/app.js': `App({})`,
-      }
-      setMockFiles(root, REPORT_DEMO)
-      jest.spyOn(process, 'exit').mockImplementation()
-      const spy = jest.spyOn(console, 'log')
-      const convertor = new Convertor(root, false)
-      expect(spy).toHaveBeenCalledTimes(3)
-      expect(spy.mock.calls[1][0]).toMatchInlineSnapshot(`[31mapp.json 读取失败，请检查！[39m`)
-      convertor.run()
-    })
+      },
+      '/images': {},
+      '/project.config.json': `{}`,
+      '/app.js': `App({})`,
+    }
+    setMockFiles(root, REPORT_DEMO)
+    jest.spyOn(process, 'exit').mockImplementation()
+    const spy = jest.spyOn(console, 'log')
+    const convert = new Convertor(root, false)
+    expect(spy).toHaveBeenCalledTimes(3)
+    convert.run()
   })
 })

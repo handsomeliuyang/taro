@@ -96,26 +96,26 @@ Map {
 
 exports[`日志 生成日志 1`] = `
 INFO [taro-cli-convertor] parseAst - 入参 
-{"sourceFilePath":"wxProjectapp.js","outputFilePath":"wxProjectapp.js","importStylePath":null,"imports":[]} 
+{"sourceFilePath":"//wxProject//app.js","outputFilePath":"//wxProject//app.js","importStylePath":null,"imports":[]} 
 INFO [taro-cli-convertor] parseAst - 解析ImportDeclaration 
 import { Block } from "@tarojs/components"; 
 INFO [taro-cli-convertor] analyzeImportUrl - 入参 
-sourceFilePath: wxProjectapp.js 
+sourceFilePath: /wxProject/app.js 
 value: @tarojs/components 
 INFO [taro-cli-convertor] parseAst - 解析ImportDeclaration 
 import React from "react"; 
 INFO [taro-cli-convertor] analyzeImportUrl - 入参 
-sourceFilePath: wxProjectapp.js 
+sourceFilePath: /wxProject/app.js 
 value: react 
 INFO [taro-cli-convertor] parseAst - 解析ImportDeclaration 
 import Taro from "@tarojs/taro"; 
 INFO [taro-cli-convertor] analyzeImportUrl - 入参 
-sourceFilePath: wxProjectapp.js 
+sourceFilePath: /wxProject/app.js 
 value: @tarojs/taro 
 INFO [taro-cli-convertor] parseAst - 解析CallExpression 
 require("@tarojs/with-weapp") 
 INFO [taro-cli-convertor] analyzeImportUrl - 入参 
-sourceFilePath: wxProjectapp.js 
+sourceFilePath: /wxProject/app.js 
 value: @tarojs/with-weapp 
 INFO [taro-cli-convertor] parseAst - 解析CallExpression 
 App({}) 
@@ -195,26 +195,26 @@ const {
 INFO [taro-cli-convertor] traversePages - 开始转换页面 
 pages/index/index 
 INFO [taro-cli-convertor] parseAst - 入参 
-{"sourceFilePath":"wxProjectpagesindexindex.js","outputFilePath":"wxProjectpagesindexindex.js","importStylePath":null,"depComponents":{},"imports":[],"pluginComponents":{}} 
+{"sourceFilePath":"//wxProject//pages//index//index.js","outputFilePath":"//wxProject//pages//index//index.js","importStylePath":null,"depComponents":{},"imports":[],"pluginComponents":{}} 
 INFO [taro-cli-convertor] parseAst - 解析ImportDeclaration 
 import { Block, View, Text } from "@tarojs/components"; 
 INFO [taro-cli-convertor] analyzeImportUrl - 入参 
-sourceFilePath: wxProjectpagesindexindex.js 
+sourceFilePath: /wxProject/pages/index/index.js 
 value: @tarojs/components 
 INFO [taro-cli-convertor] parseAst - 解析ImportDeclaration 
 import React from "react"; 
 INFO [taro-cli-convertor] analyzeImportUrl - 入参 
-sourceFilePath: wxProjectpagesindexindex.js 
+sourceFilePath: /wxProject/pages/index/index.js 
 value: react 
 INFO [taro-cli-convertor] parseAst - 解析ImportDeclaration 
 import Taro from "@tarojs/taro"; 
 INFO [taro-cli-convertor] analyzeImportUrl - 入参 
-sourceFilePath: wxProjectpagesindexindex.js 
+sourceFilePath: /wxProject/pages/index/index.js 
 value: @tarojs/taro 
 INFO [taro-cli-convertor] parseAst - 解析CallExpression 
 require("@tarojs/with-weapp") 
 INFO [taro-cli-convertor] analyzeImportUrl - 入参 
-sourceFilePath: wxProjectpagesindexindex.js 
+sourceFilePath: /wxProject/pages/index/index.js 
 value: @tarojs/with-weapp 
 INFO [taro-cli-convertor] parseAst - 解析CallExpression 
 Taro.getApp() 
