@@ -1,6 +1,7 @@
 import Taro from '@tarojs/api'
 
 import { CallbackManager } from '../../utils/handler'
+import native from '../NativeApi'
 import { NETWORK_TIMEOUT, setHeader, XHR_STATS } from './utils'
 
 
@@ -56,7 +57,7 @@ const createDownloadTask = ({ url, header, filePath, withCredentials = true, tim
       clearTimeout(timeoutInter)
       const base64Data = reader.result as string
       // @ts-ignore
-      native .saveDataUrlToFile({
+      native.saveDataUrlToFileBridgeAsync({
         filePath,
         url,
         data: base64Data,
@@ -157,7 +158,7 @@ const createDownloadTask = ({ url, header, filePath, withCredentials = true, tim
 
 /**
  * 下载文件资源到本地
- * 
+ *
  * @canUse downloadFile
  * @__object [url, filePath, header, timeout, withCredentials]
  * @__success [filePath, statusCode, tempFilePath, header, dataLength, cookies, profile]
