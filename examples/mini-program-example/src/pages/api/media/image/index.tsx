@@ -135,15 +135,24 @@ export default class Index extends React.Component {
       },
       {
         id: 'compressImage',
-        func: (apiIndex) => {
+        inputData: {
+          quality: 20,
+          compressedWidth: 300,
+          compressHeight: 200,
+          sizeType: ['original'],
+          sourceType: ['album'],
+        },
+        func: (apiIndex, data) => {
           TestConsole.consoleTest('compressImage')
           Taro.chooseImage({
+            sizeType: data.sizeType,
+            sourceType: data.sourceType,
             success: (res) => {
               Taro.compressImage({
-                quality: 1,
+                quality: data.quality,
                 src: res.tempFilePaths[0],
-                compressedWidth: 300,
-                compressHeight: 200,
+                compressedWidth: data.compressedWidth,
+                compressHeight: data.compressedWidth,
                 success: (res1) => {
                   TestConsole.consoleNormal('compressImage success ', res1)
                   Taro.saveImageToPhotosAlbum({
