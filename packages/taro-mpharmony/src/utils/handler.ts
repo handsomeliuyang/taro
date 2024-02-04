@@ -72,9 +72,14 @@ type TCallbackManagerUnit<T extends unknown[] = unknown[]> = TCallbackManagerFun
 export class CallbackManager<T extends unknown[] = unknown[]> {
   callbacks: TCallbackManagerUnit<T>[] = []
 
+  /** 去掉相同的回调 */
+  filterSameCallback = (opt: TCallbackManagerUnit<T>) => {
+    return this.callbacks.indexOf(opt) !== -1
+  }
+
   /** 添加回调 */
   add = (opt?: TCallbackManagerUnit<T>) => {
-    if (opt) this.callbacks.push(opt)
+    if (opt && this.filterSameCallback(opt)) this.callbacks.push(opt)
   }
 
   /** 插入回调 */
