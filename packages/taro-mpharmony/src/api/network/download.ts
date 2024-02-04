@@ -1,6 +1,5 @@
 import Taro from '@tarojs/api'
 
-import { CallbackManager } from '../../utils/handler'
 import { NETWORK_TIMEOUT, setHeader, XHR_STATS } from './utils'
 
 
@@ -157,7 +156,7 @@ const createDownloadTask = ({ url, header, filePath, withCredentials = true, tim
 
 /**
  * 下载文件资源到本地
- * 
+ *
  * @canUse downloadFile
  * @__object [url, filePath, header, timeout, withCredentials]
  * @__success [filePath, statusCode, tempFilePath, header, dataLength, cookies, profile]
@@ -194,4 +193,40 @@ export const downloadFile: typeof Taro.downloadFile = ({ url, header, filePath, 
       return typeof value === 'function' ? value.bind(object) : value
     },
   })
+}
+
+type TCallbackManagerFunc<T extends unknown[] = unknown[]> = (...arr: T) => void
+interface ICallbackManagerOption<T extends unknown[] = unknown[]> {
+  callback?: TCallbackManagerFunc<T>
+  ctx?: any
+  [key: string]: unknown
+}
+type TCallbackManagerUnit<T extends unknown[] = unknown[]> = TCallbackManagerFunc<T> | ICallbackManagerOption<T>
+
+export class CallbackManager<T extends unknown[] = unknown[]> {
+  callbacks: TCallbackManagerUnit<T> = null as unknown as TCallbackManagerUnit<T>
+
+  /** 添加回调 */
+  add = (opt?: TCallbackManagerUnit<T>) => {
+    if (opt) this.callbacks = opt
+  }
+
+  /** 移除回调 */
+  remove = (opt?: TCallbackManagerUnit<T>) => {
+    if (opt && this.callbacks === opt) {
+      this.callbacks = null as unknown as TCallbackManagerUnit<T>
+    }
+  }
+
+  /** 触发回调 */
+  trigger = (...args: T) => {
+    if (this.callbacks) {
+      if (isFunction(this.callbacks)) {
+        this.callbacks(...args)
+      } else {
+        const { callback, ctx } = this.callbacks
+        isFunction(callback) && callback.call(ctx, ...args)
+      }
+    }
+  }
 }
