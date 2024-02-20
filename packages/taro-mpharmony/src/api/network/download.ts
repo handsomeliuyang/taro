@@ -1,6 +1,7 @@
 import Taro from '@tarojs/api'
 
 import { CallbackManager } from '../../utils/handler'
+import native from '../NativeApi'
 import { NETWORK_TIMEOUT, setHeader, XHR_STATS } from './utils'
 
 
@@ -56,7 +57,7 @@ const createDownloadTask = ({ url, header, filePath, withCredentials = true, tim
       clearTimeout(timeoutInter)
       const base64Data = reader.result as string
       // @ts-ignore
-      native .saveDataUrlToFile({
+      native.saveDataUrlToFile({
         filePath,
         url,
         data: base64Data,
@@ -123,7 +124,7 @@ const createDownloadTask = ({ url, header, filePath, withCredentials = true, tim
    * 监听 HTTP Response Header 事件。会比请求完成事件更早
    * @param {HeadersReceivedCallback} callback HTTP Response Header 事件的回调函数
    */
-  const onHeadersReceived = callbackManager.headersReceived.add
+  const onHeadersReceived = callbackManager.headersReceived.addUnique
   /**
    * 取消监听 HTTP Response Header 事件
    * @param {HeadersReceivedCallback} callback HTTP Response Header 事件的回调函数
@@ -134,7 +135,7 @@ const createDownloadTask = ({ url, header, filePath, withCredentials = true, tim
    * 监听进度变化事件
    * @param {ProgressUpdateCallback} callback HTTP Response Header 事件的回调函数
    */
-  const onProgressUpdate = callbackManager.progressUpdate.add
+  const onProgressUpdate = callbackManager.progressUpdate.addUnique
   /**
    * 取消监听进度变化事件
    * @param {ProgressUpdateCallback} callback HTTP Response Header 事件的回调函数
@@ -157,7 +158,7 @@ const createDownloadTask = ({ url, header, filePath, withCredentials = true, tim
 
 /**
  * 下载文件资源到本地
- * 
+ *
  * @canUse downloadFile
  * @__object [url, filePath, header, timeout, withCredentials]
  * @__success [filePath, statusCode, tempFilePath, header, dataLength, cookies, profile]
