@@ -24,15 +24,22 @@ export const openBluetoothAdapter: typeof Taro.openBluetoothAdapter = (options) 
 
   return new Promise<TaroGeneral.CallbackResult>((resolve, reject) => {
 
-    native.openBluetoothAdapter({
-      success: (res: any) => {
-        const result: TaroGeneral.BluetoothError = {
-          /** 错误信息 */
-          errMsg: res[0] === 'ok' ? `${name}:${res[0]}` : `${res[0]}`,
-          /** 错误码 */
-          errCode: 0,
-        }
-        handle.success(result, { resolve, reject })
+    native.requestAccessPermission({
+      success: () => {
+        native.openBluetoothAdapter({
+          success: (res: any) => {
+            const result: TaroGeneral.BluetoothError = {
+              /** 错误信息 */
+              errMsg: res[0] === 'ok' ? `${name}:${res[0]}` : `${res[0]}`,
+              /** 错误码 */
+              errCode: 0
+            }
+            handle.success(result, { resolve, reject })
+          },
+          fail: (err: any) => {
+            handle.fail(err, { resolve, reject })
+          }
+        })
       },
       fail: (err: any) => {
         handle.fail(err, { resolve, reject })

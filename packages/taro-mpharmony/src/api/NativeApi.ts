@@ -550,6 +550,12 @@ class NativeApi {
 
   // @ts-ignore
   @window.MethodChannel.jsBridgeMode({ isAsync: false, autoRelease: true })
+  requestAccessPermission (option: any): any {
+    return option
+  }
+
+  // @ts-ignore
+  @window.MethodChannel.jsBridgeMode({ isAsync: false, autoRelease: true })
   openBluetoothAdapter (option: any): any {
     return option
   }
