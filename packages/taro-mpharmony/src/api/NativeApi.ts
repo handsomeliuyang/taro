@@ -51,6 +51,7 @@ class NativeApi {
     return options
   }
 
+  // 测试是否完整
   // @ts-ignore
   @window.MethodChannel.jsBridgeMode({ isAsync: false, autoRelease: true })
   getMenuButtonBoundingClientRect (): any {
