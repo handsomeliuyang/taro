@@ -1561,10 +1561,6 @@ importers:
         specifier: 18.1.0
         version: registry.npmjs.org/react-test-renderer@18.1.0(react@18.1.0)
 
-  packages/taro-components/dist/hydrate: {}
-
-  packages/taro-components/loader: {}
-
   packages/taro-extend:
     devDependencies:
       jest:
@@ -26103,6 +26099,7 @@ packages:
     resolution: {integrity: sha512-MKZeRNyYZAVVVG1oZeLaWie1uweH40m9AZwIwxyPbTSX4hHrVYSzLg0Ro5Z5R7XKkIX+Cc6oD1rqeDJnwsB8/A==, registry: https://registry.yarnpkg.com/, tarball: https://registry.npmjs.org/glob/-/glob-6.0.4.tgz}
     name: glob
     version: 6.0.4
+    deprecated: Glob versions prior to v9 are no longer supported
     requiresBuild: true
     dependencies:
       inflight: registry.npmjs.org/inflight@1.0.6
