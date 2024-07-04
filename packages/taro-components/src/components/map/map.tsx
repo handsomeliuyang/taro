@@ -148,7 +148,7 @@ export class Map implements ComponentInterface {
     eventName: 'tap',
   })
 
-  onTap: EventEmitter
+    onTap: EventEmitter
 
   private currentRotation = 0
   private map: any
@@ -550,7 +550,7 @@ export class Map implements ComponentInterface {
                 if (!triangle) {
                   // 如果不存在，则创建并添加新的三角形 div
                   triangle = document.createElement('div')
-                  triangle.className = 'triangle'  // 添加一个类名以便日后查找
+                  triangle.className = 'triangle' // 添加一个类名以便日后查找
                   infoWindowElement.appendChild(triangle)
                 }
 
@@ -601,7 +601,7 @@ export class Map implements ComponentInterface {
                       if (!triangle) {
                         // 如果不存在，则创建并添加新的三角形 div
                         triangle = document.createElement('div')
-                        triangle.className = 'triangle'  // 添加一个类名以便日后查找
+                        triangle.className = 'triangle' // 添加一个类名以便日后查找
                         infoWindowElement.appendChild(triangle)
                       }
 
@@ -728,7 +728,7 @@ export class Map implements ComponentInterface {
     }
     const destinationPoint = new BMapGL.Point(longitude, latitude)
     const obj: any = {
-      flagId: true,// 标记是否有有效id
+      flagId: true, // 标记是否有有效id
       flagCoordinate: true // 标记是否有有效经纬度
     }
     const animationEndResult: any = {
@@ -746,7 +746,7 @@ export class Map implements ComponentInterface {
       return obj
     }
 
-    if(latitude > 90 || latitude < -90 || longitude > 180 || longitude < -180 || isNaN(latitude) || isNaN(longitude)) {
+    if (latitude > 90 || latitude < -90 || longitude > 180 || longitude < -180 || isNaN(latitude) || isNaN(longitude)) {
       obj.flagCoordinate = false
       return obj
     }
@@ -794,7 +794,7 @@ export class Map implements ComponentInterface {
         }
       }, 16)
     } else if (option.moveWithRotate && option.autoRotate) {
-      let currentFrame = 0  // 定义局部变量
+      let currentFrame = 0 // 定义局部变量
       const animationInterval = setInterval(() => {
         currentLngLat = new BMapGL.Point(currentLngLat.lng + step.lng, currentLngLat.lat + step.lat)
         targetMarker.setPosition(currentLngLat)
@@ -807,7 +807,7 @@ export class Map implements ComponentInterface {
         }
       }, 16)
     } else if (option.moveWithRotate && !option.autoRotate) {
-      let currentFrame = 0  // 定义局部变量
+      let currentFrame = 0 // 定义局部变量
       const animationInterval = setInterval(() => {
         currentLngLat = new BMapGL.Point(currentLngLat.lng + step.lng, currentLngLat.lat + step.lat)
         targetMarker.setPosition(currentLngLat)
@@ -1006,7 +1006,7 @@ export class Map implements ComponentInterface {
                 if (!triangle) {
                   // 如果不存在，则创建并添加新的三角形 div
                   triangle = document.createElement('div')
-                  triangle.className = 'triangle'  // 添加一个类名以便日后查找
+                  triangle.className = 'triangle' // 添加一个类名以便日后查找
                   infoWindowElement.appendChild(triangle)
                 }
 
@@ -1060,7 +1060,7 @@ export class Map implements ComponentInterface {
                       if (!triangle) {
                         // 如果不存在，则创建并添加新的三角形 div
                         triangle = document.createElement('div')
-                        triangle.className = 'triangle'  // 添加一个类名以便日后查找
+                        triangle.className = 'triangle' // 添加一个类名以便日后查找
                         infoWindowElement.appendChild(triangle)
                       }
 
@@ -1138,7 +1138,7 @@ export class Map implements ComponentInterface {
     const targetMarker = this.map.getOverlays().find((overlay) => overlay instanceof BMapGL.Marker && overlay.id === targetMarkerId)
     const points = path.map((p) => new BMapGL.Point(p.longitude, p.latitude))
     const obj: any = {
-      flagId: true,// 标记是否有有效id
+      flagId: true, // 标记是否有有效id
       flagCoordinate: true // 标记是否有有效经纬度
     }
 
@@ -1151,16 +1151,15 @@ export class Map implements ComponentInterface {
     for (let i = 0; i < points.length; i++) {
       const point = points[i]
       if (point.lat < -80 && point.lat >= -90) {
-        point.lat+= 10
+        point.lat += 10
       }
-      if(point.lng < -180  || point.lng > 180 || point.lat < -90 || point.lat > 90 || isNaN(point.lng) || isNaN(point.lat)){
-        obj.flagCoordinate  = false
+      if (point.lng < -180 || point.lng > 180 || point.lat < -90 || point.lat > 90 || isNaN(point.lng) || isNaN(point.lat)) {
+        obj.flagCoordinate = false
         return obj
       }
-
     }
 
-    if(obj.flagId && obj.flagCoordinate){
+    if (obj.flagId && obj.flagCoordinate) {
       const startTime = performance.now()
 
       const animate = (timestamp) => {
@@ -1542,5 +1541,4 @@ export class Map implements ComponentInterface {
       </Host>
     )
   }
-
 }

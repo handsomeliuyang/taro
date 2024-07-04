@@ -390,11 +390,11 @@ export class NativeApi {
     return option
   }
 
-  // @ts-ignore
-  @(asyncAndNotRelease)
-  getFileInfo (option: any): any {
-    return option
-  }
+  @(asyncAndRelease)
+  getFileInformation (_option: any): void {}
+
+  @(asyncAndRelease)
+  getFileInfo (_option: any): void {}
 
   // @ts-ignore
   @(asyncAndNotRelease)
@@ -619,9 +619,6 @@ export class NativeApi {
   callInstanceAsync (option: any): any {
     return option
   }
-
-  @(asyncAndNotRelease)
-  onNativeNavigate(_options: any): void{}
 }
 
 export interface Status {

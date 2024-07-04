@@ -61,7 +61,7 @@ export class TaroHarmonyHybridIntersectionObserver implements Taro.IntersectionO
           // 使用时间戳而不是entry.time，跟微信小程序一致
           time: Date.now(),
           id: entry.target.id,
-          dataset: entry.target['dataset']
+          dataset: 'dataset' in entry.target ? entry.target.dataset : undefined
         }
         // web端会默认首次触发
         if (!this._isInited && this._options.initialRatio <= Math.min.apply(Math, this._options.thresholds)) {
@@ -125,7 +125,7 @@ export class TaroHarmonyHybridIntersectionObserver implements Taro.IntersectionO
   }
 
   public relativeToViewport (margins?: Taro.IntersectionObserver.RelativeToViewportMargins | undefined): Taro.IntersectionObserver {
-    return this.relativeTo('.taro_page', margins)
+    return this.relativeTo('.taro_router', margins)
   }
 
   private _getCallbackByElement (element: Element) {

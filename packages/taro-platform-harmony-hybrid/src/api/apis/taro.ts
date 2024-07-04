@@ -5,6 +5,7 @@ import {
   getApp,
   getCurrentInstance,
   getCurrentPages,
+  initLaunchOptions,
   loadNavigationStyle,
   navigateBack,
   navigateTo,
@@ -14,7 +15,6 @@ import {
   reLaunch,
   switchTab,
 } from './index'
-import native from "./NativeApi";
 
 const requirePlugin = () => {
   return {
@@ -27,6 +27,9 @@ const requirePlugin = () => {
 
 loadNavigationStyle()
 registerNavigationStyleHandler()
+
+// 同步小程序启动时的参数
+Taro.eventCenter.once('__taroRouterLaunch', initLaunchOptions)
 
 const {
   Behavior,
@@ -93,18 +96,3 @@ export {
   pxTransform,
   requirePlugin
 }
-
-// 监听原生的Navigate方法
-native.onNativeNavigate({
-  nativeNavigateTo: (url: string)=>{
-    navigateTo({
-      url: url,
-      success: function ( ) {}
-    })
-  },
-  nativeNavigateBack: (delta: number) => {
-    navigateBack({
-      delta: delta
-    })
-  }
-})

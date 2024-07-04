@@ -22,6 +22,7 @@ export default class Index extends React.Component {
           method: 'POST',
           timeout: 10000,
           data: { name: 'Taro' },
+          timeout: 10000,
           headers: {
             'Content-Type': 'application/json',
           },

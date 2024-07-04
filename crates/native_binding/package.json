@@ -1,6 +1,6 @@
 {
   "name": "@tarojs/binding",
-  "version": "3.6.29-harmony-hybrid-alpha.32",
+  "version": "3.6.32",
   "description": "Node binding for taro",
   "main": "binding.js",
   "typings": "binding.d.ts",
@@ -30,8 +30,7 @@
     "src/**",
     "build.rs",
     "Cargo.toml",
-    "postinstall.js",
-    "*.node"
+    "postinstall.js"
   ],
   "repository": {
     "type": "git",
